@@ -4,6 +4,7 @@ import '../styles/VolumeSlider.css';
 
 export function VolumeSlider({ deviceId = 'sky-l-90-up-left' }) {
   const [volume, setVolume] = useState(75);
+  const [lastVolume, setLastVolume] = useState(75);
   const [loading, setLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -15,11 +16,12 @@ export function VolumeSlider({ deviceId = 'sky-l-90-up-left' }) {
   const fetchVolume = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/v1/devices/${deviceId}/volume`
+        `/api/v1/devices/${deviceId}/volume`
       );
       if (response.data.success) {
         setVolume(response.data.volume);
-        setIsMuted(response.data.muted);
+        setLastVolume(response.data.volume);
+        setIsMuted(response.data.volume === 0);
       }
     } catch (error) {
       console.error('Error fetching volume:', error);
@@ -29,12 +31,13 @@ export function VolumeSlider({ deviceId = 'sky-l-90-up-left' }) {
   const handleVolumeChange = async (e) => {
     const newVolume = parseInt(e.target.value);
     setVolume(newVolume);
+    if (newVolume > 0) setLastVolume(newVolume);
     setIsMuted(newVolume === 0);
-    
+
     setLoading(true);
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/v1/devices/${deviceId}/volume`,
+        `/api/v1/devices/${deviceId}/volume`,
         { volume: newVolume }
       );
       if (response.data.success) {
@@ -51,7 +54,8 @@ export function VolumeSlider({ deviceId = 'sky-l-90-up-left' }) {
     setLoading(true);
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/v1/devices/${deviceId}/mute`
+        `/api/v1/devices/${deviceId}/volume`,
+        { volume: 0 }
       );
       if (response.data.success) {
         setVolume(0);
@@ -69,12 +73,13 @@ export function VolumeSlider({ deviceId = 'sky-l-90-up-left' }) {
     setLoading(true);
     try {
       const response = await axios.post(
-        `http://localhost:3000/api/v1/devices/${deviceId}/unmute`
+        `/api/v1/devices/${deviceId}/volume`,
+        { volume: lastVolume }
       );
       if (response.data.success) {
-        setVolume(response.data.volume);
+        setVolume(lastVolume);
         setIsMuted(false);
-        console.log(`🔊 Device unmuted - Volume: ${response.data.volume}%`);
+        console.log(`🔊 Device unmuted - Volume: ${lastVolume}%`);
       }
     } catch (error) {
       console.error('Error unmuting:', error);
