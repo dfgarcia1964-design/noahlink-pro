@@ -20,19 +20,19 @@ const DeviceCard = ({ device }) => {
         <div className="info-grid">
           <div className="info-item">
             <label>Modelo</label>
-            <value>{device?.model}</value>
+            <span>{device?.model}</span>
           </div>
           <div className="info-item">
             <label>Serial</label>
-            <value>{device?.serial}</value>
+            <span>{device?.serial}</span>
           </div>
           <div className="info-item">
             <label>Firmware</label>
-            <value>{device?.firmware}</value>
+            <span>{device?.firmware}</span>
           </div>
           <div className="info-item">
             <label>Señal</label>
-            <value>{device?.rssi} dBm</value>
+            <span>{device?.rssi} dBm</span>
           </div>
         </div>
 
