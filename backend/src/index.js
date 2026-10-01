@@ -2,14 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noahlink-pro';
 
-// Import Phase 3 routes
-const phase3Routes = require('./routes/phase3');
+// Import Phase 3 routes (MongoDB version)
+const phase3Routes = require('./routes/phase3-mongodb');
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3001' }));
@@ -62,16 +64,35 @@ app.post('/api/v1/devices/:deviceId/volume', (req, res) => {
 // ==================== PHASE 3 ROUTES ====================
 app.use('/api/v1', phase3Routes);
 
+// ==================== MONGODB CONNECTION ====================
+
+const connectMongoDB = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log('✅ MongoDB conectado exitosamente');
+    return true;
+  } catch (error) {
+    console.warn('⚠️  MongoDB no disponible, usando mock data');
+    console.warn(`   Intenta instalar MongoDB localmente o usa: ${MONGODB_URI}`);
+    return false;
+  }
+};
+
 // ==================== SERVER ====================
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
+  const dbConnected = await connectMongoDB();
   console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║          NoahLink Pro Backend Server                  ║
-║          Version 0.3.0 - Phase 1+2+3                  ║
+║          Version 0.4.0 - MongoDB Integration          ║
 ╚════════════════════════════════════════════════════════╝
 
 ✅ Servidor escuchando en puerto ${PORT}
+${dbConnected ? '✅ MongoDB conectado' : '📝 Usando mock data (MongoDB no disponible)'}
 
 📚 ENDPOINTS DISPONIBLES:
 

@@ -19,19 +19,20 @@
   "author": "NoahLink Pro Team",
   "license": "Confidential",
   "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.5.4",
-    "dotenv": "^16.0.3",
+    "axios": "^1.4.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "helmet": "^7.0.0",
+    "mongoose": "^9.10.3",
     "morgan": "^1.10.0",
-    "axios": "^1.4.0"
+    "socket.io": "^4.5.4"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "jest": "^29.7.0",
+    "@types/node": "^20.8.0",
     "eslint": "^8.50.0",
-    "@types/node": "^20.8.0"
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1"
   },
   "engines": {
     "node": ">=18.0.0",
