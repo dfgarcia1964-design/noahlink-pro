@@ -10,8 +10,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noahlink-pro';
 
-// Import Phase 3 routes (MongoDB version)
+// Import routes
+const authRoutes = require('./routes/auth');
 const phase3Routes = require('./routes/phase3-mongodb');
+const { verifyToken } = require('./middleware/auth');
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3001' }));
@@ -61,8 +63,11 @@ app.post('/api/v1/devices/:deviceId/volume', (req, res) => {
   res.json({ success: true, volume });
 });
 
-// ==================== PHASE 3 ROUTES ====================
-app.use('/api/v1', phase3Routes);
+// ==================== AUTHENTICATION ROUTES ====================
+app.use('/api/v1/auth', authRoutes);
+
+// ==================== PHASE 3 ROUTES (PROTECTED) ====================
+app.use('/api/v1', verifyToken, phase3Routes);
 
 // ==================== MONGODB CONNECTION ====================
 
@@ -88,11 +93,12 @@ const server = app.listen(PORT, async () => {
   console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║          NoahLink Pro Backend Server                  ║
-║          Version 0.4.0 - MongoDB Integration          ║
+║          Version 0.5.0 - JWT Authentication           ║
 ╚════════════════════════════════════════════════════════╝
 
 ✅ Servidor escuchando en puerto ${PORT}
 ${dbConnected ? '✅ MongoDB conectado' : '📝 Usando mock data (MongoDB no disponible)'}
+🔐 JWT Authentication habilitado
 
 📚 ENDPOINTS DISPONIBLES:
 
