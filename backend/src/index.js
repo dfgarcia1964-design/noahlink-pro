@@ -11,9 +11,10 @@ const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noahlink-pro';
 
 // Import routes
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/auth-mock'); // Using mock auth while MongoDB is unavailable
 const phase3Routes = require('./routes/phase3-mongodb');
 const { verifyToken } = require('./middleware/auth');
+const deviceDetector = require('./services/device-detector');
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3001' }));
@@ -21,46 +22,99 @@ app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Mock data
-const mockDevices = [
-  { id: 'naida-001', name: 'Naída UP 90', rssi: -45, model: 'Naída UP 90', serial: 'PH234567AB', firmware: '9.2.5' }
-];
-
+// Device storage
+let detectedDevices = [];
 let connectedDevice = null;
+
+// Initialize device detection
+async function initializeDevices() {
+  try {
+    detectedDevices = await deviceDetector.scanDevices();
+    console.log(`🎧 Found ${detectedDevices.length} hearing aid(s)`);
+    return detectedDevices;
+  } catch (error) {
+    console.error('Error detecting devices:', error.message);
+    return [];
+  }
+}
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date(), bluetooth: connectedDevice ? 'connected' : 'disconnected' });
 });
 
-app.get('/api/v1/devices', (req, res) => {
-  res.json({ success: true, count: mockDevices.length, devices: mockDevices });
+app.get('/api/v1/devices', async (req, res) => {
+  try {
+    const devices = detectedDevices.length > 0 ? detectedDevices : await initializeDevices();
+    res.json({
+      success: true,
+      count: devices.length,
+      devices,
+      source: 'Real devices detected'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
-app.post('/api/v1/devices/:deviceId/connect', (req, res) => {
-  const device = mockDevices.find(d => d.id === req.params.deviceId);
-  if (!device) return res.status(404).json({ error: 'Not found' });
-  connectedDevice = device;
-  res.json({ success: true, device });
+app.post('/api/v1/devices/:deviceId/connect', async (req, res) => {
+  try {
+    const result = await deviceDetector.connectDevice(req.params.deviceId);
+    if (result.success) {
+      connectedDevice = result.device;
+      res.json({ success: true, device: result.device, connectedAt: result.connectedAt });
+    } else {
+      res.status(404).json({ success: false, error: result.error });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-app.post('/api/v1/devices/:deviceId/disconnect', (req, res) => {
-  connectedDevice = null;
-  res.json({ success: true });
+app.post('/api/v1/devices/:deviceId/disconnect', async (req, res) => {
+  try {
+    const result = await deviceDetector.disconnectDevice(req.params.deviceId);
+    connectedDevice = null;
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-app.get('/api/v1/devices/:deviceId/status', (req, res) => {
-  if (!connectedDevice) return res.status(400).json({ error: 'Not connected' });
-  res.json({ success: true, device: { ...connectedDevice, battery: { level: 85 } } });
+app.get('/api/v1/devices/:deviceId/status', async (req, res) => {
+  try {
+    if (!connectedDevice) {
+      return res.status(400).json({ error: 'Not connected' });
+    }
+    const details = await deviceDetector.getDeviceDetails(req.params.deviceId);
+    res.json({ success: true, device: details });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-app.get('/api/v1/devices/:deviceId/battery', (req, res) => {
-  res.json({ success: true, battery: { level: Math.floor(Math.random() * 100), percentage: '85%' } });
+app.get('/api/v1/devices/:deviceId/battery', async (req, res) => {
+  try {
+    const result = await deviceDetector.getBatteryInfo(req.params.deviceId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-app.post('/api/v1/devices/:deviceId/volume', (req, res) => {
-  const { volume } = req.body;
-  if (typeof volume !== 'number') return res.status(400).json({ error: 'Invalid' });
-  res.json({ success: true, volume });
+app.post('/api/v1/devices/:deviceId/volume', async (req, res) => {
+  try {
+    const { volume } = req.body;
+    if (typeof volume !== 'number' || volume < 0 || volume > 100) {
+      return res.status(400).json({ error: 'Invalid volume (0-100)' });
+    }
+    const result = await deviceDetector.setVolume(req.params.deviceId, volume);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 // ==================== AUTHENTICATION ROUTES ====================
@@ -90,15 +144,22 @@ const connectMongoDB = async () => {
 
 const server = app.listen(PORT, async () => {
   const dbConnected = await connectMongoDB();
+
+  // Initialize device detection
+  const devices = await initializeDevices();
+
   console.log(`
 ╔════════════════════════════════════════════════════════╗
 ║          NoahLink Pro Backend Server                  ║
 ║          Version 0.5.0 - JWT Authentication           ║
+║          🎧 Real Device Detection Enabled             ║
 ╚════════════════════════════════════════════════════════╝
 
 ✅ Servidor escuchando en puerto ${PORT}
 ${dbConnected ? '✅ MongoDB conectado' : '📝 Usando mock data (MongoDB no disponible)'}
 🔐 JWT Authentication habilitado
+🎧 Audífonos detectados: ${devices.length}
+${devices.length > 0 ? devices.map(d => `   • ${d.name} (${d.model}) - Batería: ${d.battery}%`).join('\n') : '   (Sin audífonos disponibles)'}
 
 📚 ENDPOINTS DISPONIBLES:
 
