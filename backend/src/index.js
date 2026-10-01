@@ -104,14 +104,36 @@ app.get('/api/v1/devices/:deviceId/battery', async (req, res) => {
   }
 });
 
+app.get('/api/v1/devices/:deviceId/volume', async (req, res) => {
+  try {
+    const volumeManager = require('./services/volume-manager');
+    const currentVolume = volumeManager.getVolume(req.params.deviceId) || 50;
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      volume: currentVolume,
+      description: volumeManager.getVolumeDescription(currentVolume)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.post('/api/v1/devices/:deviceId/volume', async (req, res) => {
   try {
     const { volume } = req.body;
     if (typeof volume !== 'number' || volume < 0 || volume > 100) {
       return res.status(400).json({ error: 'Invalid volume (0-100)' });
     }
+    const volumeManager = require('./services/volume-manager');
+    volumeManager.setVolume(req.params.deviceId, volume);
     const result = await deviceDetector.setVolume(req.params.deviceId, volume);
-    res.json(result);
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      volume: volume,
+      description: volumeManager.getVolumeDescription(volume)
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
