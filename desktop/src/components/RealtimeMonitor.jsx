@@ -1,38 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useRealtimeData, useBatteryHistory } from '../hooks/useRealtimeData';
 import '../styles/RealtimeMonitor.css';
 
-const RealtimeMonitor = ({ device, batteryHistory }) => {
-  const [currentBattery, setCurrentBattery] = useState(85);
-  const [updateTime, setUpdateTime] = useState(new Date());
+const RealtimeMonitor = ({ device, batteryHistory: initialHistory }) => {
+  // Fetch real-time data every 5 seconds
+  const { battery: batteryData, loading, error } = useRealtimeData(
+    device?.id,
+    5000
+  );
 
-  // Simulate real-time battery updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate gradual battery drain
-      setCurrentBattery(prev => Math.max(0, prev - Math.random() * 0.5));
-      setUpdateTime(new Date());
-    }, 3000);
+  // Fetch battery history for trend
+  const { history: liveHistory } = useBatteryHistory(device?.id, 4);
 
-    return () => clearInterval(interval);
-  }, []);
+  // Use battery data from API, fallback to initial data
+  const currentBattery = batteryData?.battery ?? 85;
+  const batteryStatus = batteryData?.status ?? 'good';
+  const batteryLabel = batteryData?.statusLabel ?? 'Bueno';
+  const updateTime = new Date();
 
-  const getBatteryStatus = (level) => {
-    if (level >= 75) return { status: 'excellent', label: 'Excelente' };
-    if (level >= 50) return { status: 'good', label: 'Bueno' };
-    if (level >= 25) return { status: 'warning', label: 'Bajo' };
-    return { status: 'critical', label: 'Crítico' };
+  const getStatusStyle = () => {
+    if (currentBattery >= 75) return 'excellent';
+    if (currentBattery >= 50) return 'good';
+    if (currentBattery >= 25) return 'warning';
+    return 'critical';
   };
-
-  const batteryStatus = getBatteryStatus(currentBattery);
 
   return (
     <div className="realtime-monitor">
-      <h2>🔴 Monitor en Vivo</h2>
+      <h2>🔴 Monitor en Vivo {loading && <span className="spinner">⟳</span>}</h2>
 
       <div className="monitor-content">
         {/* Battery Gauge */}
         <div className="battery-gauge">
-          <div className={`gauge ${batteryStatus.status}`}>
+          <div className={`gauge ${getStatusStyle()}`}>
             <div className="gauge-label">{Math.round(currentBattery)}%</div>
             <div className="gauge-circle">
               <svg viewBox="0 0 100 100">
@@ -48,7 +48,8 @@ const RealtimeMonitor = ({ device, batteryHistory }) => {
                 />
               </svg>
             </div>
-            <div className="gauge-status">{batteryStatus.label}</div>
+            <div className="gauge-status">{batteryLabel}</div>
+            {error && <div className="gauge-error">⚠ Error</div>}
           </div>
         </div>
 
@@ -56,9 +57,9 @@ const RealtimeMonitor = ({ device, batteryHistory }) => {
         <div className="status-indicators">
           <div className="indicator">
             <label>Conexión</label>
-            <div className="indicator-value connected">
+            <div className={`indicator-value ${device ? 'connected' : 'disconnected'}`}>
               <span className="dot"></span>
-              Conectado
+              {device ? 'Conectado' : 'Desconectado'}
             </div>
           </div>
 
@@ -78,6 +79,7 @@ const RealtimeMonitor = ({ device, batteryHistory }) => {
             <label>Actualización</label>
             <div className="indicator-value">
               {updateTime.toLocaleTimeString('es-ES')}
+              {loading && <span className="pulse"></span>}
             </div>
           </div>
         </div>
@@ -99,15 +101,16 @@ const RealtimeMonitor = ({ device, batteryHistory }) => {
         </div>
       </div>
 
+      {/* Battery Trend - Last 4 hours */}
       <div className="battery-trend">
         <h3>Tendencia de Batería (últimas 4h)</h3>
         <div className="mini-chart">
-          {batteryHistory.slice(-4).map((h, i) => (
+          {(liveHistory.length > 0 ? liveHistory : initialHistory.slice(-4)).map((h, i) => (
             <div
               key={i}
               className="bar"
               style={{ height: `${h.level}%` }}
-              title={`${h.level}%`}
+              title={`${h.level}% - ${new Date(h.timestamp).toLocaleTimeString('es-ES')}`}
             />
           ))}
         </div>

@@ -23,24 +23,42 @@ const Dashboard = () => {
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [darkMode, setDarkMode] = useState(false);
 
-  // Fetch device status on mount and setup polling
+  // Fetch device status and battery history on mount
   useEffect(() => {
     const fetchDeviceStatus = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/v1/devices');
+        const response = await axios.get('/api/v1/devices');
         if (response.data.devices && response.data.devices.length > 0) {
           const connectedDevice = response.data.devices[0];
           setDevice(connectedDevice);
           setConnectionStatus('connected');
 
-          // Simulate battery history (Phase 2: will be real data from backend)
-          generateMockBatteryHistory(connectedDevice.id);
+          // Fetch real battery history from API
+          await fetchBatteryHistory(connectedDevice.id);
         }
         setLoading(false);
       } catch (error) {
         console.error('Error fetching device:', error);
         setConnectionStatus('error');
         setLoading(false);
+      }
+    };
+
+    const fetchBatteryHistory = async (deviceId) => {
+      try {
+        const response = await axios.get(
+          `/api/v1/devices/${deviceId}/battery/history?hours=24`
+        );
+        if (response.data.data && response.data.data.length > 0) {
+          setBatteryHistory(response.data.data);
+        } else {
+          // Fallback to mock data if no real history
+          generateMockBatteryHistory(deviceId);
+        }
+      } catch (error) {
+        console.error('Error fetching battery history:', error);
+        // Fallback to mock if API fails
+        generateMockBatteryHistory(deviceId);
       }
     };
 

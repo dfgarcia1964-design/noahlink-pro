@@ -97,8 +97,36 @@ app.get('/api/v1/devices/:deviceId/status', async (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/battery', async (req, res) => {
   try {
-    const result = await deviceDetector.getBatteryInfo(req.params.deviceId);
-    res.json(result);
+    const batteryManager = require('./services/battery-manager');
+    const level = batteryManager.getBatteryLevel(req.params.deviceId);
+    const status = batteryManager.getBatteryStatus(level);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      battery: level,
+      status: status.status,
+      statusLabel: status.label,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/battery/history', async (req, res) => {
+  try {
+    const batteryManager = require('./services/battery-manager');
+    const hours = parseInt(req.query.hours) || 24;
+    const history = batteryManager.getHistory(req.params.deviceId, hours);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      hours,
+      count: history.length,
+      data: history
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
