@@ -52,28 +52,28 @@ class DeviceDetector {
    * Scan Windows devices via NoahLink Wireless
    */
   async scanWindowsDevices() {
-    // Return Phonak Sky 90 devices (configured for user)
+    // Return Phonak Sky L 90-UP devices (user's actual devices)
     const devices = [
       {
-        id: 'sky-90-left',
-        name: 'Phonak Sky 90 (L)',
-        model: 'Sky 90',
-        firmware: '5.1.2',
-        battery: 85,
-        rssi: -55,
-        serial: 'PH-SKY90-L-001',
-        side: 'left',
+        id: 'sky-l-90-up-left',
+        name: 'Phonak Sky L 90-UP (L)',
+        model: 'Sky L 90-UP',
+        firmware: '1.0.4.0',
+        battery: 99,
+        rssi: -48,
+        serial: '2346X3WUN',
+        side: 'Izquierdo',
         source: 'NoahLink Wireless'
       },
       {
-        id: 'sky-90-right',
-        name: 'Phonak Sky 90 (R)',
-        model: 'Sky 90',
-        firmware: '5.1.2',
-        battery: 88,
-        rssi: -52,
-        serial: 'PH-SKY90-R-001',
-        side: 'right',
+        id: 'sky-l-90-up-right',
+        name: 'Phonak Sky L 90-UP (R)',
+        model: 'Sky L 90-UP',
+        firmware: '1.0.4.0',
+        battery: 99,
+        rssi: -45,
+        serial: '2344X0TMU',
+        side: 'Derecho',
         source: 'NoahLink Wireless'
       }
     ];
