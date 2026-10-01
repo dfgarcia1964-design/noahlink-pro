@@ -20,15 +20,23 @@ class DeviceDetector {
    * Scan for connected devices
    */
   async scanDevices() {
+    this.isScanning = true;
+
     try {
-      this.isScanning = true;
+      console.log(`🔍 Scanning for devices on ${this.platform}...`);
 
       if (this.platform === 'win32') {
-        return await this.scanWindowsDevices();
+        const devices = await this.scanWindowsDevices();
+        this.devices = devices;
+        return devices;
       } else if (this.platform === 'darwin') {
-        return await this.scanMacDevices();
+        const devices = await this.scanMacDevices();
+        this.devices = devices;
+        return devices;
       } else if (this.platform === 'linux') {
-        return await this.scanLinuxDevices();
+        const devices = await this.scanLinuxDevices();
+        this.devices = devices;
+        return devices;
       }
 
       return [];
@@ -44,39 +52,34 @@ class DeviceDetector {
    * Scan Windows devices via NoahLink Wireless
    */
   async scanWindowsDevices() {
-    try {
-      // Return Phonak Sky 90 devices (configured for user)
-      const devices = [
-        {
-          id: 'sky-90-left',
-          name: 'Phonak Sky 90 (L)',
-          model: 'Sky 90',
-          firmware: '5.1.2',
-          battery: 85,
-          rssi: -55,
-          serial: 'PH-SKY90-L-001',
-          side: 'left',
-          source: 'NoahLink Wireless'
-        },
-        {
-          id: 'sky-90-right',
-          name: 'Phonak Sky 90 (R)',
-          model: 'Sky 90',
-          firmware: '5.1.2',
-          battery: 88,
-          rssi: -52,
-          serial: 'PH-SKY90-R-001',
-          side: 'right',
-          source: 'NoahLink Wireless'
-        }
-      ];
+    // Return Phonak Sky 90 devices (configured for user)
+    const devices = [
+      {
+        id: 'sky-90-left',
+        name: 'Phonak Sky 90 (L)',
+        model: 'Sky 90',
+        firmware: '5.1.2',
+        battery: 85,
+        rssi: -55,
+        serial: 'PH-SKY90-L-001',
+        side: 'left',
+        source: 'NoahLink Wireless'
+      },
+      {
+        id: 'sky-90-right',
+        name: 'Phonak Sky 90 (R)',
+        model: 'Sky 90',
+        firmware: '5.1.2',
+        battery: 88,
+        rssi: -52,
+        serial: 'PH-SKY90-R-001',
+        side: 'right',
+        source: 'NoahLink Wireless'
+      }
+    ];
 
-      console.log(`✅ Found ${devices.length} device(s) via NoahLink Wireless`);
-      return devices;
-    } catch (error) {
-      console.error('Error scanning Windows devices:', error.message);
-      return [];
-    }
+    console.log(`✅ Found ${devices.length} device(s) via NoahLink Wireless`);
+    return devices;
   }
 
   /**
