@@ -61,6 +61,7 @@ export function VolumeSlider({ deviceId = 'sky-l-90-up-left' }) {
         setVolume(0);
         setIsMuted(true);
         console.log('🔇 Device muted');
+        await fetchVolume();
       }
     } catch (error) {
       console.error('Error muting:', error);
@@ -80,6 +81,7 @@ export function VolumeSlider({ deviceId = 'sky-l-90-up-left' }) {
         setVolume(lastVolume);
         setIsMuted(false);
         console.log(`🔊 Device unmuted - Volume: ${lastVolume}%`);
+        await fetchVolume();
       }
     } catch (error) {
       console.error('Error unmuting:', error);
