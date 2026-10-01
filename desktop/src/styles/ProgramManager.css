@@ -1,0 +1,211 @@
+.program-manager {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+@media (max-width: 1200px) {
+  .grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.program-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.program-list h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.programs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.program-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  background: #f9fafb;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-size: 13px;
+}
+
+.program-item:hover {
+  background: #f3f4f6;
+  border-color: #667eea;
+}
+
+.program-item.active {
+  background: #ede9fe;
+  border-color: #667eea;
+}
+
+.program-icon {
+  font-size: 24px;
+}
+
+.program-text {
+  flex: 1;
+}
+
+.program-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.program-desc {
+  font-size: 12px;
+  color: #666;
+}
+
+.checkmark {
+  color: #667eea;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.program-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.program-details h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.details-panel {
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.program-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.icon {
+  font-size: 32px;
+}
+
+.program-header h4 {
+  margin: 0 0 4px 0;
+  color: #333;
+}
+
+.program-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.settings-section h5 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 13px;
+}
+
+.frequency-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.frequency-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.frequency-item label {
+  font-size: 11px;
+  color: #666;
+}
+
+.gain-bar {
+  width: 30px;
+  height: 60px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.gain-fill {
+  width: 100%;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+  display: block;
+}
+
+.gain-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+}
+
+.program-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn.primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.btn.secondary {
+  background: #e5e7eb;
+  color: #333;
+}
+
+.btn.secondary:hover {
+  background: #d1d5db;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

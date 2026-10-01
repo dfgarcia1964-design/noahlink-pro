@@ -1,0 +1,151 @@
+.program-editor {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.program-editor h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.program-name-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.program-name-section label {
+  font-weight: 600;
+  color: #333;
+  min-width: 150px;
+}
+
+.program-name-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.program-name-input:focus {
+  border-color: #667eea;
+  outline: none;
+}
+
+.program-name-input:disabled {
+  background: #f9fafb;
+  color: #999;
+}
+
+.frequency-editor h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.frequency-sliders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.frequency-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.frequency-control label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #666;
+}
+
+.frequency-slider {
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+}
+
+.frequency-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #667eea;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.gain-display {
+  font-size: 12px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.frequency-graph {
+  padding: 15px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.frequency-graph h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.response-graph {
+  width: 100%;
+  max-height: 200px;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn.primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+.btn.secondary {
+  background: #e5e7eb;
+  color: #333;
+}
+
+.btn.secondary:hover {
+  background: #d1d5db;
+}

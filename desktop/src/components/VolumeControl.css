@@ -1,0 +1,123 @@
+.volume-control {
+  padding: 20px;
+  background: white;
+  border-radius: 6px;
+}
+
+.volume-control h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.volume-display {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.volume-percentage {
+  font-size: 3em;
+  font-weight: bold;
+  color: #667eea;
+  margin: 0;
+}
+
+.volume-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.volume-icon {
+  font-size: 1.5em;
+}
+
+.volume-slider {
+  flex: 1;
+  height: 8px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border: 3px solid #667eea;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border: 3px solid #667eea;
+}
+
+.volume-slider:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quick-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.quick-btn {
+  flex: 1;
+  padding: 10px;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.quick-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+  border-color: #667eea;
+}
+
+.quick-btn.center {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.quick-btn.center:hover:not(:disabled) {
+  background: #764ba2;
+}
+
+.quick-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.volume-status {
+  text-align: center;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.volume-status p {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #667eea;
+}
