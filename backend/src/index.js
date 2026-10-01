@@ -8,6 +8,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Import Phase 3 routes
+const phase3Routes = require('./routes/phase3');
+
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3001' }));
 app.use(morgan('combined'));
@@ -56,14 +59,64 @@ app.post('/api/v1/devices/:deviceId/volume', (req, res) => {
   res.json({ success: true, volume });
 });
 
+// ==================== PHASE 3 ROUTES ====================
+app.use('/api/v1', phase3Routes);
+
+// ==================== SERVER ====================
+
 const server = app.listen(PORT, () => {
   console.log(`
-╔════════════════════════════════════════╗
-║     NoahLink Pro Backend Server        ║
-║     Version 0.1.0 - Fase 1             ║
-╚════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════╗
+║          NoahLink Pro Backend Server                  ║
+║          Version 0.3.0 - Phase 1+2+3                  ║
+╚════════════════════════════════════════════════════════╝
 
 ✅ Servidor escuchando en puerto ${PORT}
+
+📚 ENDPOINTS DISPONIBLES:
+
+Phase 1 (Device Control):
+  • GET    /api/v1/devices
+  • POST   /api/v1/devices/:deviceId/connect
+  • POST   /api/v1/devices/:deviceId/disconnect
+  • GET    /api/v1/devices/:deviceId/status
+  • GET    /api/v1/devices/:deviceId/battery
+  • POST   /api/v1/devices/:deviceId/volume
+
+Phase 3 (Advanced Features):
+  📋 Programs:
+    • GET    /api/v1/programs
+    • GET    /api/v1/programs/:programId
+    • POST   /api/v1/programs
+    • PUT    /api/v1/programs/:programId
+    • DELETE /api/v1/programs/:programId
+
+  📊 Analytics:
+    • GET    /api/v1/analytics/trends
+    • GET    /api/v1/analytics/distribution
+    • GET    /api/v1/analytics/insights
+
+  👤 Profiles:
+    • GET    /api/v1/profiles
+    • GET    /api/v1/profiles/:profileId
+    • POST   /api/v1/profiles
+    • PUT    /api/v1/profiles/:profileId
+    • DELETE /api/v1/profiles/:profileId
+
+  ⚙️ Settings:
+    • GET    /api/v1/settings
+    • PUT    /api/v1/settings
+    • POST   /api/v1/settings/reset
+
+  🔔 Alerts:
+    • GET    /api/v1/alerts
+    • GET    /api/v1/alerts/:alertId
+    • POST   /api/v1/alerts
+    • PUT    /api/v1/alerts/:alertId
+    • DELETE /api/v1/alerts/:alertId
+    • POST   /api/v1/alerts/mark-all/read
+    • DELETE /api/v1/alerts (delete all)
+
 📡 Test: curl http://localhost:${PORT}/health
   `);
 });
