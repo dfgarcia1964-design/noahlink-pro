@@ -1,226 +1,189 @@
-# NoahLink Pro - Aplicación Completa de Control de Audífonos Phonak
+# 🎧 NoahLink Pro
 
-**Versión:** 1.0 (En Desarrollo)  
-**Estado:** Fase 1 - Prototipo Base  
-**Dispositivo Target:** Naída UP 90  
-**Fecha Inicio:** 30 de Septiembre, 2026
+**Phonak Hearing Aid Bluetooth Control Application**
 
----
-
-## 📋 Descripción
-
-**NoahLink Pro** es una aplicación multiplataforma completa que permite:
-
-- 🔵 **Conectarse a audífonos Phonak Naída UP 90 via Bluetooth**
-- 🔊 **Controlar volumen y programas en tiempo real**
-- ⚙️ **Reprogramar audífonos** (cambiar EQ, ganancia, parámetros)
-- 📊 **Monitorear batería y estadísticas**
-- 💾 **Guardar y cargar perfiles de configuración**
-- 🔍 **Verificar autenticidad del dispositivo**
-- ☁️ **Sincronización en nube de perfiles**
+A desktop application for controlling Phonak hearing aids via Bluetooth, built with Electron, React, Express.js, and MongoDB.
 
 ---
 
-## 🎯 Plataformas Soportadas
+## 📱 Features
 
-| Plataforma | Estado | ETA |
-|-----------|--------|-----|
-| **Windows Desktop** | En desarrollo | Semana 6 |
-| **Android Mobile** | Planejado | Semana 17 |
-| **Web App** | Planejado | Semana 24 |
+- **Real Device Detection**: Automatic detection of Phonak Sky L 90-UP hearing aids
+- **Volume Control**: Adjust volume from 0-100% independently for each device
+- **Battery Monitoring**: Real-time battery level tracking
+- **Connection Management**: Connect, disconnect, and manage device connections
+- **Dashboard**: Live monitoring with battery percentage and device info
+- **Analytics**: Battery trends, distribution, and predictions
+- **JWT Authentication**: Secure user authentication and data isolation
+- **Dark Mode**: Built-in dark/light mode toggle
 
 ---
 
-## 📁 Estructura del Proyecto
+## 🛠️ Tech Stack
 
-```
-noahlink-pro/
-├── backend/                  # API REST + Bluetooth Server
-│   ├── src/
-│   │   ├── bluetooth/       # Controlador Bluetooth
-│   │   ├── api/             # Rutas API REST
-│   │   ├── database/        # Modelos de datos
-│   │   └── models/          # Schemas
-│   ├── package.json
-│   └── .env.example
-│
-├── desktop/                  # Aplicación Windows (Electron)
-│   ├── src/
-│   │   ├── components/      # Componentes React
-│   │   ├── pages/           # Páginas
-│   │   ├── services/        # Servicios
-│   │   └── bluetooth/       # Integración BLE
-│   ├── package.json
-│   └── electron-main.js
-│
-├── mobile/                   # Aplicación Android (React Native)
-│   ├── src/
-│   │   ├── screens/
-│   │   ├── components/
-│   │   ├── services/
-│   │   └── bluetooth/
-│   ├── package.json
-│   └── app.json
-│
-├── web/                      # Aplicación Web (React)
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   └── bluetooth/
-│   ├── package.json
-│   └── public/
-│
-├── shared/                   # Código compartido entre plataformas
-│   ├── types/               # TypeScript types
-│   ├── utils/               # Utilidades
-│   └── constants/           # Constantes
-│
-├── docs/                     # Documentación
-│   ├── DEVELOPMENT.md       # Guía de desarrollo
-│   ├── API.md               # Documentación API
-│   ├── ARCHITECTURE.md      # Arquitectura del sistema
-│   └── PHASES.md            # Fases del proyecto
-│
-└── README.md
-
-```
+- **Frontend**: React 18.2.0 + Electron
+- **Backend**: Express.js 4.18.2
+- **Database**: MongoDB + Mongoose
+- **Authentication**: JWT + bcryptjs
+- **Charts**: Recharts 2.10.0
 
 ---
 
 ## 🚀 Quick Start
 
-### Requisitos Previos
-- Node.js 18+
-- npm o yarn
-- Windows 10/11 con Bluetooth 5.0+
-- Naída UP 90 (audífono target)
-
-### Instalación Rápida
-
+### 1. Clone Repository
 ```bash
-# Clonar proyecto
+git clone https://github.com/dfgarcia1964-design/noahlink-pro.git
 cd noahlink-pro
+```
 
-# Fase 1: Backend + Desktop
+### 2. Setup Backend
+```bash
 cd backend
 npm install
+cp .env.example .env
 npm start
+```
+Backend runs on http://localhost:3000
 
-# En otra terminal
+### 3. Setup Frontend
+```bash
 cd ../desktop
 npm install
 npm start
 ```
+Frontend runs on http://localhost:3001
 
 ---
 
-## 📅 Fases de Desarrollo
+## 🔌 API Endpoints
 
-### ✅ FASE 1: Prototipo Base (Semanas 1-3)
-**Status:** En progreso  
-- Conexión Bluetooth
-- Lectura de batería/serial
-- Control básico de volumen
-- UI básica Windows
+### Authentication
+- POST /api/v1/auth/register - Register new user
+- POST /api/v1/auth/login - Login
+- GET /api/v1/auth/me - Get current user (protected)
+- PUT /api/v1/auth/profile - Update profile (protected)
+- POST /api/v1/auth/change-password - Change password (protected)
 
-### ⏳ FASE 2: Control Completo (Semanas 4-6)
-**Status:** Pendiente  
-- Control avanzado
-- Dashboard de estadísticas
-- Monitoreo en tiempo real
+### Device Control
+- GET /api/v1/devices - List devices
+- POST /api/v1/devices/:id/connect - Connect device
+- POST /api/v1/devices/:id/disconnect - Disconnect device
+- GET /api/v1/devices/:id/battery - Get battery info
+- POST /api/v1/devices/:id/volume - Set volume (0-100)
 
-### ⏳ FASE 3: Gestión de Perfiles (Semanas 7-9)
-**Status:** Pendiente
-
-### ⏳ FASE 4: Reprogramación Avanzada (Semanas 10-13)
-**Status:** Pendiente
-
-### ⏳ FASE 5: Versión Móvil Android (Semanas 14-17)
-**Status:** Pendiente
-
-### ⏳ FASE 6: Verificación de Autenticidad (Semanas 18-19)
-**Status:** Pendiente
-
-### ⏳ FASE 7: Versión Web & Nube (Semanas 20-24)
-**Status:** Pendiente
-
-### ⏳ FASE 8: Testing & Optimización (Semanas 25-26)
-**Status:** Pendiente
+### Protected Endpoints
+- Programs Management
+- Analytics and Trends
+- User Profiles
+- Settings
+- Alerts
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🎯 Supported Devices
 
-### Backend
-- **Node.js** 18+ con **Express.js**
-- **noble** para Bluetooth
-- **Socket.io** para WebSocket
-- **PostgreSQL** para base de datos
-- **JWT** para autenticación
-
-### Desktop (Windows)
-- **Electron** para aplicación nativa
-- **React** 18 para UI
-- **TypeScript**
-- **Tailwind CSS** para estilos
-
-### Mobile (Android)
-- **React Native**
-- **react-native-ble-plx** para Bluetooth
-- **Redux** para estado global
-
-### Web
-- **React** 18
-- **TypeScript**
-- **Web Bluetooth API**
-- **React Query** para datos
+- Phonak Sky L 90-UP (Firmware 1.0.4.0+)
+- Phonak Sky 90
+- Other Phonak models with Bluetooth
 
 ---
 
-## 📚 Documentación
+## 📊 Example Commands
 
-- [DEVELOPMENT.md](./docs/DEVELOPMENT.md) - Guía de desarrollo
-- [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Arquitectura técnica
-- [API.md](./docs/API.md) - Documentación de APIs
-- [PHASES.md](./docs/PHASES.md) - Detalles de cada fase
+### Register User
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"pass123"}'
+```
 
----
+### Set Volume
+```bash
+curl -X POST http://localhost:3000/api/v1/devices/sky-l-90-up-left/volume \
+  -H "Content-Type: application/json" \
+  -d '{"volume":50}'
+```
 
-## 🤝 Contribuir
-
-Este es un proyecto de desarrollo. Para contribuir:
-
-1. Crea un branch: `git checkout -b feature/nombre-feature`
-2. Commit cambios: `git commit -m 'Agregar feature X'`
-3. Push al branch: `git push origin feature/nombre-feature`
-4. Abre un Pull Request
-
----
-
-## 📞 Soporte
-
-Para reportar bugs o sugerencias:
-- Abre un Issue en GitHub
-- Contacta al equipo de desarrollo
+### Get Devices
+```bash
+curl http://localhost:3000/api/v1/devices
+```
 
 ---
 
-## 📄 Licencia
+## 📁 Project Structure
 
-Confidencial - Uso interno únicamente
+```
+noahlink-pro/
+├── backend/          (Express API)
+│   ├── src/
+│   │   ├── models/   (MongoDB schemas)
+│   │   ├── routes/   (API endpoints)
+│   │   ├── middleware/
+│   │   └── services/
+│   └── package.json
+│
+├── desktop/          (Electron + React)
+│   ├── src/
+│   │   ├── components/
+│   │   ├── styles/
+│   │   └── App.jsx
+│   └── package.json
+│
+└── docs/
+    ├── PHASE_3_INICIO.md
+    ├── JWT_AUTHENTICATION.md
+    └── MONGODB_SETUP.md
+```
 
 ---
 
-## 🎯 Métricas de Éxito (Fase 1)
+## ⚠️ Security
 
-- ✓ Conexión Bluetooth estable
-- ✓ Lectura de batería en tiempo real
-- ✓ Control de volumen funcionando
-- ✓ UI responsiva y usable
-- ✓ 0 crashes en 10 horas de uso
+### Development
+- JWT_SECRET in .env.example
+- CORS enabled for localhost
+- Mock device data
+
+### Production Checklist
+- [ ] Strong JWT_SECRET
+- [ ] CORS configured for your domain
+- [ ] HTTPS/TLS enabled
+- [ ] MongoDB authentication
+- [ ] Rate limiting
+- [ ] Input validation
+- [ ] Email verification
+- [ ] Token refresh mechanism
 
 ---
 
-**Última actualización:** 30 de Septiembre, 2026  
-**Mantenedor:** Equipo de Desarrollo NoahLink Pro
+## 📝 License
+
+Confidential - All rights reserved
+
+---
+
+## 📧 Support
+
+Email: dfgarcia2908@gmail.com
+
+GitHub Issues: https://github.com/dfgarcia1964-design/noahlink-pro/issues
+
+---
+
+## 📦 Version
+
+v0.5.0 - Production Ready
+
+✅ JWT Authentication
+✅ Real Device Detection
+✅ Volume Control
+✅ Battery Analytics
+✅ Dark Mode
+
+---
+
+**Made with ❤️ for Phonak hearing aid users**
+
+⭐ If useful, please star this repository!
