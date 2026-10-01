@@ -4,6 +4,7 @@ import '../styles/Dashboard.css';
 import DeviceCard from './DeviceCard';
 import RealtimeMonitor from './RealtimeMonitor';
 import BatteryChart from './BatteryChart';
+import BatteryPrediction from './BatteryPrediction';
 import ProgramManager from './ProgramManager';
 import EventLog from './EventLog';
 import ProgramEditor from './ProgramEditor';
@@ -16,6 +17,7 @@ import VolumeSlider from './VolumeSlider';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [batterySubTab, setBatterySubTab] = useState('history');
   const [device, setDevice] = useState(null);
   const [batteryHistory, setBatteryHistory] = useState([]);
   const [events, setEvents] = useState([]);
@@ -222,31 +224,28 @@ const Dashboard = () => {
         {/* Battery Tab */}
         {activeTab === 'battery' && (
           <div className="tab-panel battery">
-            <h2>Historial de Batería</h2>
+            <div className="battery-subtabs">
+              <button
+                className={`subtab ${batterySubTab === 'history' ? 'active' : ''}`}
+                onClick={() => setBatterySubTab('history')}
+              >
+                📊 Historial
+              </button>
+              <button
+                className={`subtab ${batterySubTab === 'prediction' ? 'active' : ''}`}
+                onClick={() => setBatterySubTab('prediction')}
+              >
+                🔮 Predicción
+              </button>
+            </div>
+
             {batteryHistory.length > 0 ? (
               <>
-                <BatteryChart data={batteryHistory} />
-                <div className="battery-stats">
-                  <div className="stat">
-                    <label>Nivel Actual:</label>
-                    <span className="value">{batteryHistory[batteryHistory.length - 1]?.level || 0}%</span>
-                  </div>
-                  <div className="stat">
-                    <label>Mínimo (24h):</label>
-                    <span className="value">
-                      {Math.min(...batteryHistory.map(h => h.level)) || 0}%
-                    </span>
-                  </div>
-                  <div className="stat">
-                    <label>Máximo (24h):</label>
-                    <span className="value">
-                      {Math.max(...batteryHistory.map(h => h.level)) || 0}%
-                    </span>
-                  </div>
-                </div>
+                {batterySubTab === 'history' && <BatteryChart data={batteryHistory} />}
+                {batterySubTab === 'prediction' && <BatteryPrediction data={batteryHistory} />}
               </>
             ) : (
-              <div style={{ padding: '40px', textAlign: 'center' }}>Cargando historial de batería...</div>
+              <div style={{ padding: '40px', textAlign: 'center' }}>Cargando datos de batería...</div>
             )}
           </div>
         )}
