@@ -12,6 +12,7 @@ import UserProfiles from './UserProfiles';
 import Settings from './Settings';
 import DarkModeToggle from './DarkModeToggle';
 import AlertsCenter from './AlertsCenter';
+import VolumeSlider from './VolumeSlider';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -192,6 +193,7 @@ const Dashboard = () => {
               <div className="grid-2col">
                 <DeviceCard device={device} />
                 <RealtimeMonitor device={device} batteryHistory={batteryHistory} />
+                <VolumeSlider deviceId="sky-l-90-up-left" />
               </div>
             ) : (
               <div style={{ padding: '40px', textAlign: 'center' }}>Conectando...</div>
