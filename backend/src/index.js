@@ -143,7 +143,12 @@ app.post('/api/v1/devices/:deviceId/volume', async (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 
 // ==================== PHASE 3 ROUTES (PROTECTED) ====================
-app.use('/api/v1', verifyToken, phase3Routes);
+// Only protect phase3 specific routes
+app.use('/api/v1/programs', verifyToken, phase3Routes);
+app.use('/api/v1/analytics', verifyToken, phase3Routes);
+app.use('/api/v1/profiles', verifyToken, phase3Routes);
+app.use('/api/v1/settings', verifyToken, phase3Routes);
+app.use('/api/v1/alerts', verifyToken, phase3Routes);
 
 // ==================== MONGODB CONNECTION ====================
 
