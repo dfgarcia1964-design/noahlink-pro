@@ -544,6 +544,104 @@ app.post('/api/v1/devices/:deviceId/custom-programs/:programId/activate', (req, 
   }
 });
 
+// ==================== ANALYTICS ENDPOINTS ====================
+app.get('/api/v1/devices/:deviceId/analytics/summary', (req, res) => {
+  try {
+    const analyticsService = require('./services/analytics');
+    const eventManager = require('./services/event-manager');
+    const batteryManager = require('./services/battery-manager');
+
+    const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
+    const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
+    const stats = analyticsService.calculateUsageStats(events, batteryHistory);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      stats: stats,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/analytics/insights', (req, res) => {
+  try {
+    const analyticsService = require('./services/analytics');
+    const eventManager = require('./services/event-manager');
+    const batteryManager = require('./services/battery-manager');
+
+    const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
+    const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
+    const stats = analyticsService.calculateUsageStats(events, batteryHistory);
+    const insights = analyticsService.generateInsights(stats);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      insights: insights
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/analytics/recommendations', (req, res) => {
+  try {
+    const analyticsService = require('./services/analytics');
+    const eventManager = require('./services/event-manager');
+    const batteryManager = require('./services/battery-manager');
+    const programManager = require('./services/program-manager');
+
+    const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
+    const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
+    const stats = analyticsService.calculateUsageStats(events, batteryHistory);
+    const allPrograms = programManager.getAllPrograms();
+
+    const recommendations = analyticsService.generateRecommendations(stats, allPrograms, batteryHistory);
+    const programRecommendations = analyticsService.recommendPrograms(events, batteryHistory);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      recommendations: recommendations,
+      programRecommendations: programRecommendations
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/analytics/health', (req, res) => {
+  try {
+    const analyticsService = require('./services/analytics');
+    const eventManager = require('./services/event-manager');
+    const batteryManager = require('./services/battery-manager');
+
+    const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
+    const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
+    const stats = analyticsService.calculateUsageStats(events, batteryHistory);
+
+    const health = {
+      overall: stats.deviceHealth,
+      battery: stats.batteryStats,
+      errors: stats.usagePatterns.errorsCount,
+      lastErrorTime: events
+        .reverse()
+        .find(e => e.severity === 'error' || e.severity === 'critical')?.timestamp || null
+    };
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      health: health
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== AUTHENTICATION ROUTES ====================
 app.use('/api/v1/auth', authRoutes);
 
