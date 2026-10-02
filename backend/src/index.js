@@ -259,6 +259,111 @@ app.get('/api/v1/devices/:deviceId/programs/history/:limit?', (req, res) => {
   }
 });
 
+// ==================== EVENT LOGGING ENDPOINTS ====================
+app.get('/api/v1/devices/:deviceId/events', (req, res) => {
+  try {
+    const eventManager = require('./services/event-manager');
+    const limit = parseInt(req.query.limit) || 50;
+    const type = req.query.type;
+    const severity = req.query.severity;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+
+    let events;
+
+    if (type) {
+      events = eventManager.getEventsByType(req.params.deviceId, type, limit);
+    } else if (severity) {
+      events = eventManager.getEventsBySeverity(req.params.deviceId, severity, limit);
+    } else if (startDate && endDate) {
+      events = eventManager.getEventsByDateRange(req.params.deviceId, startDate, endDate, limit);
+    } else {
+      events = eventManager.getEventsByDeviceId(req.params.deviceId, limit);
+    }
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      count: events.length,
+      filters: { type, severity, startDate, endDate },
+      data: events
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/v1/devices/:deviceId/events/log', (req, res) => {
+  try {
+    const { type, severity, data } = req.body;
+    const eventManager = require('./services/event-manager');
+
+    const event = eventManager.logEvent(
+      req.params.deviceId,
+      type,
+      data || {},
+      severity || 'info'
+    );
+
+    res.json({
+      success: true,
+      event: event
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/events/stats', (req, res) => {
+  try {
+    const eventManager = require('./services/event-manager');
+    const stats = eventManager.getEventStats(req.params.deviceId);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      stats: stats
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/events/export', (req, res) => {
+  try {
+    const eventManager = require('./services/event-manager');
+    const filter = {
+      type: req.query.type,
+      severity: req.query.severity,
+      startDate: req.query.startDate,
+      endDate: req.query.endDate
+    };
+
+    const csv = eventManager.exportAsCSV(req.params.deviceId, filter);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="events-${req.params.deviceId}-${new Date().toISOString().split('T')[0]}.csv"`);
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/v1/devices/:deviceId/events/clear', (req, res) => {
+  try {
+    const eventManager = require('./services/event-manager');
+    const days = parseInt(req.query.days) || 30;
+    const result = eventManager.clearOldEvents(req.params.deviceId, days);
+
+    res.json({
+      success: true,
+      result: result
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== AUTHENTICATION ROUTES ====================
 app.use('/api/v1/auth', authRoutes);
 
