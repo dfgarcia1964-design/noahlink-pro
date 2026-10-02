@@ -364,6 +364,186 @@ app.delete('/api/v1/devices/:deviceId/events/clear', (req, res) => {
   }
 });
 
+// ==================== CUSTOM PROGRAMS ENDPOINTS ====================
+app.get('/api/v1/devices/:deviceId/custom-programs', (req, res) => {
+  try {
+    const customProgramsManager = require('./services/custom-programs');
+    const programs = customProgramsManager.getAllCustomPrograms(req.params.deviceId);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      count: programs.length,
+      data: programs
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/v1/devices/:deviceId/custom-programs', (req, res) => {
+  try {
+    const customProgramsManager = require('./services/custom-programs');
+    const { name, description, icon, frequency, gain, metadata } = req.body;
+
+    // Validate
+    const validation = customProgramsManager.validateProgram({
+      name,
+      description,
+      icon,
+      frequency,
+      gain,
+      metadata
+    });
+
+    if (!validation.valid) {
+      return res.status(400).json({
+        success: false,
+        errors: validation.errors
+      });
+    }
+
+    const program = customProgramsManager.createProgram(req.params.deviceId, {
+      name,
+      description,
+      icon,
+      frequency,
+      gain,
+      metadata
+    });
+
+    res.status(201).json({
+      success: true,
+      program: program
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
+  try {
+    const customProgramsManager = require('./services/custom-programs');
+    const program = customProgramsManager.getCustomProgram(
+      req.params.deviceId,
+      req.params.programId
+    );
+
+    if (!program) {
+      return res.status(404).json({ success: false, error: 'Program not found' });
+    }
+
+    const stats = customProgramsManager.getProgramStats(program);
+
+    res.json({
+      success: true,
+      program: program,
+      stats: stats
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.put('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
+  try {
+    const customProgramsManager = require('./services/custom-programs');
+    const { name, description, icon, frequency, gain, metadata } = req.body;
+
+    // Validate if provided
+    if (frequency || gain) {
+      const validation = customProgramsManager.validateProgram({
+        name: name || 'temp',
+        frequency: frequency || [],
+        gain: gain || []
+      });
+
+      if (!validation.valid) {
+        return res.status(400).json({
+          success: false,
+          errors: validation.errors
+        });
+      }
+    }
+
+    const program = customProgramsManager.updateProgram(
+      req.params.deviceId,
+      req.params.programId,
+      { name, description, icon, frequency, gain, metadata }
+    );
+
+    res.json({
+      success: true,
+      program: program
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
+  try {
+    const customProgramsManager = require('./services/custom-programs');
+    const result = customProgramsManager.deleteProgram(
+      req.params.deviceId,
+      req.params.programId
+    );
+
+    res.json({
+      success: true,
+      result: result
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/v1/devices/:deviceId/custom-programs/:programId/duplicate', (req, res) => {
+  try {
+    const customProgramsManager = require('./services/custom-programs');
+    const programManager = require('./services/program-manager');
+
+    const sourceProgram =
+      customProgramsManager.getCustomProgram(req.params.deviceId, req.params.programId) ||
+      programManager.getProgram(req.params.programId);
+
+    if (!sourceProgram) {
+      return res.status(404).json({ success: false, error: 'Source program not found' });
+    }
+
+    const newName = req.body.name || `${sourceProgram.name} (Copy)`;
+    const program = customProgramsManager.duplicateProgram(
+      req.params.deviceId,
+      sourceProgram,
+      newName
+    );
+
+    res.status(201).json({
+      success: true,
+      program: program
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/v1/devices/:deviceId/custom-programs/:programId/activate', (req, res) => {
+  try {
+    const customProgramsManager = require('./services/custom-programs');
+    const program = customProgramsManager.activateProgram(
+      req.params.deviceId,
+      req.params.programId
+    );
+
+    res.json({
+      success: true,
+      program: program
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== AUTHENTICATION ROUTES ====================
 app.use('/api/v1/auth', authRoutes);
 
