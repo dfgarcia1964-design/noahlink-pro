@@ -167,6 +167,98 @@ app.post('/api/v1/devices/:deviceId/volume', async (req, res) => {
   }
 });
 
+// ==================== PROGRAM ENDPOINTS ====================
+app.get('/api/v1/programs', (req, res) => {
+  try {
+    const programManager = require('./services/program-manager');
+    const programs = programManager.getAllPrograms();
+    res.json({
+      success: true,
+      count: programs.length,
+      data: programs
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/programs', (req, res) => {
+  try {
+    const programManager = require('./services/program-manager');
+    const programs = programManager.getAllPrograms();
+    const activeProgram = programManager.getActiveProgram(req.params.deviceId);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      activeProgram: activeProgram.id,
+      programs: programs,
+      count: programs.length
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/v1/devices/:deviceId/programs/:programId/switch', (req, res) => {
+  try {
+    const programManager = require('./services/program-manager');
+    const result = programManager.switchProgram(
+      req.params.deviceId,
+      req.params.programId
+    );
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      activeProgram: req.params.programId,
+      program: programManager.getProgram(req.params.programId),
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/programs/:programId', (req, res) => {
+  try {
+    const programManager = require('./services/program-manager');
+    const program = programManager.getProgram(req.params.programId);
+
+    if (!program) {
+      return res.status(404).json({ success: false, error: 'Program not found' });
+    }
+
+    const stats = programManager.getProgramStats(req.params.programId);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      program: program,
+      stats: stats
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/v1/devices/:deviceId/programs/history/:limit?', (req, res) => {
+  try {
+    const programManager = require('./services/program-manager');
+    const limit = parseInt(req.params.limit) || 20;
+    const history = programManager.getProgramHistory(req.params.deviceId, limit);
+
+    res.json({
+      success: true,
+      deviceId: req.params.deviceId,
+      count: history.length,
+      data: history
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== AUTHENTICATION ROUTES ====================
 app.use('/api/v1/auth', authRoutes);
 
