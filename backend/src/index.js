@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 
+const logger = require('./utils/logger');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noahlink-pro';
@@ -36,10 +37,10 @@ let connectedDevice = null;
 async function initializeDevices() {
   try {
     detectedDevices = await deviceDetector.scanDevices();
-    console.log(`🎧 Found ${detectedDevices.length} hearing aid(s)`);
+    logger.info(`Found ${detectedDevices.length} hearing aid(s)`);
     return detectedDevices;
   } catch (error) {
-    console.error('Error detecting devices:', error.message);
+    logger.error('Error detecting devices', error.message);
     return [];
   }
 }
@@ -627,11 +628,11 @@ const connectMongoDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
-    console.log('✅ MongoDB conectado exitosamente');
+    logger.success('MongoDB conectado exitosamente');
     return true;
   } catch (error) {
-    console.warn('⚠️  MongoDB no disponible, usando mock data');
-    console.warn(`   Intenta instalar MongoDB localmente o usa: ${MONGODB_URI}`);
+    logger.warn('MongoDB no disponible, usando mock data');
+    logger.warn(`Intenta instalar MongoDB localmente o usa: ${MONGODB_URI}`);
     return false;
   }
 };
@@ -644,7 +645,7 @@ const server = app.listen(PORT, async () => {
   // Initialize device detection
   const devices = await initializeDevices();
 
-  console.log(`
+  logger.success(`
 ╔════════════════════════════════════════════════════════╗
 ║          NoahLink Pro Backend Server                  ║
 ║          Version 0.5.0 - JWT Authentication           ║
@@ -656,50 +657,6 @@ ${dbConnected ? '✅ MongoDB conectado' : '📝 Usando mock data (MongoDB no dis
 🔐 JWT Authentication habilitado
 🎧 Audífonos detectados: ${devices.length}
 ${devices.length > 0 ? devices.map(d => `   • ${d.name} (${d.model}) - Batería: ${d.battery}%`).join('\n') : '   (Sin audífonos disponibles)'}
-
-📚 ENDPOINTS DISPONIBLES:
-
-Phase 1 (Device Control):
-  • GET    /api/v1/devices
-  • POST   /api/v1/devices/:deviceId/connect
-  • POST   /api/v1/devices/:deviceId/disconnect
-  • GET    /api/v1/devices/:deviceId/status
-  • GET    /api/v1/devices/:deviceId/battery
-  • POST   /api/v1/devices/:deviceId/volume
-
-Phase 3 (Advanced Features):
-  📋 Programs:
-    • GET    /api/v1/programs
-    • GET    /api/v1/programs/:programId
-    • POST   /api/v1/programs
-    • PUT    /api/v1/programs/:programId
-    • DELETE /api/v1/programs/:programId
-
-  📊 Analytics:
-    • GET    /api/v1/analytics/trends
-    • GET    /api/v1/analytics/distribution
-    • GET    /api/v1/analytics/insights
-
-  👤 Profiles:
-    • GET    /api/v1/profiles
-    • GET    /api/v1/profiles/:profileId
-    • POST   /api/v1/profiles
-    • PUT    /api/v1/profiles/:profileId
-    • DELETE /api/v1/profiles/:profileId
-
-  ⚙️ Settings:
-    • GET    /api/v1/settings
-    • PUT    /api/v1/settings
-    • POST   /api/v1/settings/reset
-
-  🔔 Alerts:
-    • GET    /api/v1/alerts
-    • GET    /api/v1/alerts/:alertId
-    • POST   /api/v1/alerts
-    • PUT    /api/v1/alerts/:alertId
-    • DELETE /api/v1/alerts/:alertId
-    • POST   /api/v1/alerts/mark-all/read
-    • DELETE /api/v1/alerts (delete all)
 
 📡 Test: curl http://localhost:${PORT}/health
   `);

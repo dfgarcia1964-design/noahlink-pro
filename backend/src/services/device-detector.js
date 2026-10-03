@@ -8,6 +8,7 @@ const os = require('os');
 const { exec } = require('child_process');
 const util = require('util');
 const execPromise = util.promisify(exec);
+const logger = require('../utils/logger');
 
 class DeviceDetector {
   constructor() {
@@ -23,7 +24,7 @@ class DeviceDetector {
     this.isScanning = true;
 
     try {
-      console.log(`🔍 Scanning for devices on ${this.platform}...`);
+      logger.info(`Scanning for devices on ${this.platform}...`);
 
       if (this.platform === 'win32') {
         const devices = await this.scanWindowsDevices();
@@ -41,7 +42,7 @@ class DeviceDetector {
 
       return [];
     } catch (error) {
-      console.error('❌ Error scanning devices:', error.message);
+      logger.error('Error scanning devices', error.message);
       return [];
     } finally {
       this.isScanning = false;
@@ -78,7 +79,7 @@ class DeviceDetector {
       }
     ];
 
-    console.log(`✅ Found ${devices.length} device(s) via NoahLink Wireless`);
+    logger.success(`Found ${devices.length} device(s) via NoahLink Wireless`);
     return devices;
   }
 
@@ -293,7 +294,7 @@ class DeviceDetector {
         ]
       };
     } catch (error) {
-      console.error('Error getting device details:', error.message);
+      logger.error('Error getting device details', error.message);
       return null;
     }
   }
@@ -309,14 +310,14 @@ class DeviceDetector {
         throw new Error(`Device ${deviceId} not found`);
       }
 
-      console.log(`✅ Connected to ${device.name}`);
+      logger.success(`Connected to ${device.name}`);
       return {
         success: true,
         device,
         connectedAt: new Date()
       };
     } catch (error) {
-      console.error('Error connecting to device:', error.message);
+      logger.error('Error connecting to device', error.message);
       return {
         success: false,
         error: error.message
@@ -329,13 +330,13 @@ class DeviceDetector {
    */
   async disconnectDevice(deviceId) {
     try {
-      console.log(`🔌 Disconnected from device ${deviceId}`);
+      logger.info(`Disconnected from device ${deviceId}`);
       return {
         success: true,
         deviceId
       };
     } catch (error) {
-      console.error('Error disconnecting:', error.message);
+      logger.error('Error disconnecting', error.message);
       return {
         success: false,
         error: error.message
@@ -352,14 +353,14 @@ class DeviceDetector {
         throw new Error('Volume must be between 0 and 100');
       }
 
-      console.log(`🔊 Set volume to ${volume}% on ${deviceId}`);
+      logger.info(`Set volume to ${volume}% on ${deviceId}`);
       return {
         success: true,
         deviceId,
         volume
       };
     } catch (error) {
-      console.error('Error setting volume:', error.message);
+      logger.error('Error setting volume', error.message);
       return {
         success: false,
         error: error.message
