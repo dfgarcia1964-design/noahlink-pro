@@ -1,0 +1,87 @@
+{
+  "device-sky-l-90-up-left": [
+    {
+      "id": "evt-001",
+      "timestamp": "2026-10-03T08:15:00Z",
+      "type": "connection",
+      "severity": "info",
+      "title": "Dispositivo conectado",
+      "message": "Sky L 90-UP conectado exitosamente",
+      "userId": "user-001"
+    },
+    {
+      "id": "evt-002",
+      "timestamp": "2026-10-03T08:45:00Z",
+      "type": "program_switch",
+      "severity": "info",
+      "title": "Programa cambiado",
+      "message": "Programa cambió de 'Conversación' a 'Aire Libre'",
+      "userId": "user-001",
+      "data": {
+        "fromProgram": "Conversación",
+        "toProgram": "Aire Libre"
+      }
+    },
+    {
+      "id": "evt-003",
+      "timestamp": "2026-10-03T09:30:00Z",
+      "type": "volume_change",
+      "severity": "info",
+      "title": "Volumen ajustado",
+      "message": "Volumen cambió de 50% a 65%",
+      "userId": "user-001",
+      "data": {
+        "fromVolume": 50,
+        "toVolume": 65
+      }
+    },
+    {
+      "id": "evt-004",
+      "timestamp": "2026-10-03T11:00:00Z",
+      "type": "battery",
+      "severity": "warning",
+      "title": "Batería moderada",
+      "message": "Batería por debajo del 85%",
+      "userId": "user-001",
+      "data": {
+        "level": 85
+      }
+    },
+    {
+      "id": "evt-005",
+      "timestamp": "2026-10-03T13:00:00Z",
+      "type": "battery",
+      "severity": "warning",
+      "title": "Batería baja",
+      "message": "Batería por debajo del 50%, considera cargar",
+      "userId": "user-001",
+      "data": {
+        "level": 75
+      }
+    }
+  ],
+  "device-sky-l-90-up-right": [
+    {
+      "id": "evt-101",
+      "timestamp": "2026-10-03T08:15:00Z",
+      "type": "connection",
+      "severity": "info",
+      "title": "Dispositivo conectado",
+      "message": "Sky L 90-UP conectado exitosamente",
+      "userId": "user-001"
+    },
+    {
+      "id": "evt-102",
+      "timestamp": "2026-10-03T10:15:00Z",
+      "type": "program_switch",
+      "severity": "info",
+      "title": "Programa cambiado",
+      "message": "Programa cambió de 'Conversación' a 'Música'",
+      "userId": "user-001",
+      "data": {
+        "fromProgram": "Conversación",
+        "toProgram": "Música"
+      }
+    }
+  ]
+}

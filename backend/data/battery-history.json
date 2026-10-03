@@ -1,0 +1,78 @@
+{
+  "device-sky-l-90-up-left": [
+    {
+      "timestamp": "2026-10-03T08:00:00Z",
+      "level": 100,
+      "voltage": 1.5,
+      "temperature": 22
+    },
+    {
+      "timestamp": "2026-10-03T09:00:00Z",
+      "level": 95,
+      "voltage": 1.48,
+      "temperature": 23
+    },
+    {
+      "timestamp": "2026-10-03T10:00:00Z",
+      "level": 90,
+      "voltage": 1.46,
+      "temperature": 22
+    },
+    {
+      "timestamp": "2026-10-03T11:00:00Z",
+      "level": 85,
+      "voltage": 1.44,
+      "temperature": 24
+    },
+    {
+      "timestamp": "2026-10-03T12:00:00Z",
+      "level": 80,
+      "voltage": 1.42,
+      "temperature": 23
+    },
+    {
+      "timestamp": "2026-10-03T13:00:00Z",
+      "level": 75,
+      "voltage": 1.40,
+      "temperature": 22
+    }
+  ],
+  "device-sky-l-90-up-right": [
+    {
+      "timestamp": "2026-10-03T08:00:00Z",
+      "level": 98,
+      "voltage": 1.49,
+      "temperature": 21
+    },
+    {
+      "timestamp": "2026-10-03T09:00:00Z",
+      "level": 93,
+      "voltage": 1.47,
+      "temperature": 22
+    },
+    {
+      "timestamp": "2026-10-03T10:00:00Z",
+      "level": 88,
+      "voltage": 1.45,
+      "temperature": 23
+    },
+    {
+      "timestamp": "2026-10-03T11:00:00Z",
+      "level": 83,
+      "voltage": 1.43,
+      "temperature": 22
+    },
+    {
+      "timestamp": "2026-10-03T12:00:00Z",
+      "level": 78,
+      "voltage": 1.41,
+      "temperature": 21
+    },
+    {
+      "timestamp": "2026-10-03T13:00:00Z",
+      "level": 73,
+      "voltage": 1.39,
+      "temperature": 22
+    }
+  ]
+}

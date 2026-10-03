@@ -1,0 +1,52 @@
+{
+  "devices": {
+    "device-sky-l-90-up-left": {
+      "id": "device-sky-l-90-up-left",
+      "name": "Phonak Sky L 90-UP (L)",
+      "model": "Sky L 90-UP",
+      "side": "Izquierdo",
+      "connected": true,
+      "connectedAt": "2026-10-03T08:15:00Z",
+      "currentProgram": "Aire Libre",
+      "volume": 65,
+      "muted": false,
+      "battery": {
+        "level": 75,
+        "status": "good",
+        "statusLabel": "Bueno",
+        "lastUpdated": "2026-10-03T13:00:00Z"
+      },
+      "signal": {
+        "rssi": -45,
+        "quality": "strong"
+      },
+      "firmware": "1.0.4.0",
+      "serial": "2346X3WUN",
+      "lastSync": "2026-10-03T13:05:00Z"
+    },
+    "device-sky-l-90-up-right": {
+      "id": "device-sky-l-90-up-right",
+      "name": "Phonak Sky L 90-UP (R)",
+      "model": "Sky L 90-UP",
+      "side": "Derecho",
+      "connected": true,
+      "connectedAt": "2026-10-03T08:15:00Z",
+      "currentProgram": "Música",
+      "volume": 62,
+      "muted": false,
+      "battery": {
+        "level": 73,
+        "status": "good",
+        "statusLabel": "Bueno",
+        "lastUpdated": "2026-10-03T13:00:00Z"
+      },
+      "signal": {
+        "rssi": -42,
+        "quality": "strong"
+      },
+      "firmware": "1.0.4.0",
+      "serial": "2345X3WUM",
+      "lastSync": "2026-10-03T13:05:00Z"
+    }
+  }
+}

@@ -14,6 +14,8 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noahli
 // Import routes
 const authRoutes = require('./routes/auth-mock'); // Using mock auth while MongoDB is unavailable
 const phase3Routes = require('./routes/phase3-mongodb');
+const batteryRoutes = require('./routes/battery'); // Phase 2: Battery history
+const eventsRoutes = require('./routes/events'); // Phase 2: Event logging
 const { verifyToken } = require('./middleware/auth');
 const deviceDetector = require('./services/device-detector');
 const volumeManager = require('./services/volume-manager');
@@ -616,6 +618,10 @@ app.get('/api/v1/devices/:deviceId/analytics/health', (req, res) => {
 
 // ==================== AUTHENTICATION ROUTES ====================
 app.use('/api/v1/auth', authRoutes);
+
+// ==================== PHASE 2 ROUTES - BATTERY & EVENTS ====================
+app.use('/api/v1/devices/:deviceId/battery', batteryRoutes);
+app.use('/api/v1/devices/:deviceId/events', eventsRoutes);
 
 // ==================== PHASE 3 ROUTES (PROTECTED) ====================
 app.use('/api/v1', verifyToken, phase3Routes);
