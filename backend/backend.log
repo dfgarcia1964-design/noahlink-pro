@@ -1,3 +1,7 @@
+
+> noahlink-pro-backend@0.1.0 start
+> node src/index.js
+
 ⚠️  MongoDB no disponible, usando mock data
    Intenta instalar MongoDB localmente o usa: mongodb://localhost:27017/noahlink-pro
 🔍 Scanning for devices on win32...
@@ -63,3 +67,28 @@ Phase 3 (Advanced Features):
 
 📡 Test: curl http://localhost:3000/health
   
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices HTTP/1.1" 200 458 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=24 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+🔊 Initialized volume for sky-l-90-up-left: 75%
+🔊 Initialized volume for [object Object]: 75%
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 200 195 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices HTTP/1.1" 200 458 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=24 HTTP/1.1" 200 77 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 200 76 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 200 195 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
+::1 - - [03/Oct/2026:13:07:55 +0000] "GET /health HTTP/1.1" 200 81 "-" "curl/8.21.0"
+::1 - - [03/Oct/2026:13:07:56 +0000] "GET /api/v1/devices HTTP/1.1" 200 458 "-" "curl/8.21.0"
+::1 - - [03/Oct/2026:13:08:32 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"

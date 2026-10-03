@@ -8,7 +8,7 @@
     "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3001 && npm run electron-start\"",
     "react-start": "cross-env PORT=3001 react-scripts start",
     "react-build": "react-scripts build",
-    "electron-start": "electron public/electron.js",
+    "electron-start": "cross-env NODE_ENV=development electron public/electron.js",
     "electron-build": "npm run react-build && electron-builder",
     "build": "npm run react-build && npm run electron-build",
     "test": "react-scripts test",
