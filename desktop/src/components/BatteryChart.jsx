@@ -1,192 +1,168 @@
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ReferenceLine
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import '../styles/BatteryChart.css';
+import useBatteryHistory from '../hooks/useBatteryHistory';
 
-const BatteryChart = ({ data }) => {
-  // Format data for charts
-  const chartData = useMemo(() => {
-    return data.map(item => ({
-      time: new Date(item.timestamp).toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      bateria: item.level,
-      timestamp: item.timestamp,
-      date: new Date(item.timestamp)
-    }));
-  }, [data]);
+/**
+ * BatteryChart - Gráfico de tendencias de batería con Recharts
+ * Muestra historial de batería en gráfico de líneas
+ */
+const BatteryChart = ({ deviceId }) => {
+  const [timeRange, setTimeRange] = useState('24h');
+  const { data, stats, loading, error, refresh } = useBatteryHistory(deviceId, timeRange);
 
-  // Calculate statistics
-  const stats = useMemo(() => {
-    if (data.length === 0) return null;
-
-    const levels = data.map(d => d.level);
-    const current = levels[levels.length - 1];
-    const min = Math.min(...levels);
-    const max = Math.max(...levels);
-    const avg = Math.round(levels.reduce((a, b) => a + b) / levels.length);
-
-    // Calculate drain rate (% per hour)
-    let drainRate = 0;
-    if (data.length > 1) {
-      const firstTime = new Date(data[0].timestamp).getTime();
-      const lastTime = new Date(data[data.length - 1].timestamp).getTime();
-      const hoursDiff = (lastTime - firstTime) / (1000 * 60 * 60);
-      if (hoursDiff > 0) {
-        drainRate = ((data[0].level - current) / hoursDiff).toFixed(2);
-      }
-    }
-
-    // Predict when battery will die
-    let timeUntilEmpty = 'N/A';
-    if (drainRate > 0 && current > 0) {
-      const hoursLeft = (current / drainRate).toFixed(1);
-      timeUntilEmpty = hoursLeft > 24 ? '> 24h' : `${hoursLeft}h`;
-    }
-
-    return { current, min, max, avg, drainRate, timeUntilEmpty };
-  }, [data]);
-
-  // Battery status
-  const getBatteryAlert = () => {
-    if (!stats) return null;
-    if (stats.current >= 75) {
-      return { icon: '🟢', label: 'Excelente', color: '#22c55e' };
-    } else if (stats.current >= 50) {
-      return { icon: '🟢', label: 'Bueno', color: '#84cc16' };
-    } else if (stats.current >= 25) {
-      return { icon: '🟡', label: 'Bajo', color: '#f59e0b' };
-    } else {
-      return { icon: '🔴', label: 'Crítico', color: '#ef4444' };
-    }
-  };
-
-  const alert = getBatteryAlert();
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="custom-tooltip">
-          <p className="time">{data.time}</p>
-          <p className="level" style={{ color: payload[0].color }}>
-            🔋 {payload[0].value}%
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  if (!data || data.length === 0) {
-    return <div className="battery-chart empty">No hay datos disponibles</div>;
+  if (loading) {
+    return <div style={{ padding: '20px', textAlign: 'center', height: '400px' }}>Cargando gráfico...</div>;
   }
 
+  if (error) {
+    return <div style={{ padding: '20px', color: '#ef4444' }}>Error: {error}</div>;
+  }
+
+  if (!data || data.length === 0) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Sin datos disponibles</div>;
+  }
+
+  const handleTimeRangeChange = (range) => {
+    setTimeRange(range);
+  };
+
+  const getRangeLabel = () => {
+    if (timeRange === '24h') return 'Últimas 24 horas';
+    if (timeRange === '7d') return 'Últimos 7 días';
+    if (timeRange === '30d') return 'Últimos 30 días';
+    return timeRange;
+  };
+
   return (
-    <div className="battery-chart">
-      {/* Main Chart */}
-      <div className="chart-container">
-        <h3>Historial de Batería (24h)</h3>
-        <ResponsiveContainer width="100%" height={350}>
-          <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-            <defs>
-              <linearGradient id="colorBateria" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
+    <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ margin: '0', fontSize: '20px', fontWeight: '700' }}>Tendencia de Batería</h2>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {['24h', '7d', '30d'].map((range) => (
+            <button
+              key={range}
+              onClick={() => handleTimeRangeChange(range)}
+              style={{
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: '600',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                backgroundColor: timeRange === range ? '#2563eb' : '#e5e7eb',
+                color: timeRange === range ? '#ffffff' : '#1f2937',
+                transition: 'all 0.2s'
+              }}
+            >
+              {range === '24h' ? '24H' : range === '7d' ? '7D' : '30D'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <p style={{ margin: '0', fontSize: '12px', color: '#6b7280' }}>
+          {getRangeLabel()}
+        </p>
+      </div>
+
+      {/* Gráfico */}
+      <div style={{ width: '100%', height: '300px', backgroundColor: '#ffffff', borderRadius: '6px', padding: '12px' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="time"
-              tick={{ fontSize: 11 }}
-              interval={Math.max(0, Math.floor(chartData.length / 8))}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              interval={Math.floor(data.length / 5)}
             />
             <YAxis
               domain={[0, 100]}
-              label={{ value: '% Batería', angle: -90, position: 'insideLeft' }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              label={{ value: '%', angle: -90, position: 'insideLeftMiddle', offset: 10, fill: '#6b7280' }}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <ReferenceLine y={25} stroke="#ef4444" strokeDasharray="5 5" label="Crítico (25%)" />
-            <ReferenceLine y={50} stroke="#f59e0b" strokeDasharray="5 5" label="Bajo (50%)" />
-            <Area
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px'
+              }}
+              formatter={(value) => [`${value}%`, 'Batería']}
+              labelStyle={{ color: '#1f2937' }}
+            />
+            <Legend
+              wrapperStyle={{ paddingTop: '12px' }}
+              iconType="line"
+            />
+            <Line
               type="monotone"
-              dataKey="bateria"
-              stroke="#3b82f6"
-              fillOpacity={1}
-              fill="url(#colorBateria)"
+              dataKey="level"
+              stroke="#2563eb"
+              strokeWidth={2}
+              dot={{ fill: '#2563eb', r: 4 }}
+              activeDot={{ r: 6 }}
               name="Nivel de Batería"
-              isAnimationActive={true}
-              animationDuration={800}
+              isAnimationActive={false}
             />
-          </AreaChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="chart-info">
-        <div className="info-card stats">
-          <h4>📊 Estadísticas</h4>
-          <div className="stat-grid">
-            <div className="stat-item">
-              <label>Actual</label>
-              <span className="value">{stats?.current || 0}%</span>
-            </div>
-            <div className="stat-item">
-              <label>Promedio</label>
-              <span className="value">{stats?.avg || 0}%</span>
-            </div>
-            <div className="stat-item">
-              <label>Mínimo (24h)</label>
-              <span className="value">{stats?.min || 0}%</span>
-            </div>
-            <div className="stat-item">
-              <label>Máximo (24h)</label>
-              <span className="value">{stats?.max || 0}%</span>
-            </div>
-            <div className="stat-item">
-              <label>Drenaje/hora</label>
-              <span className="value">{stats?.drainRate || 0}%/h</span>
-            </div>
-            <div className="stat-item">
-              <label>Tiempo hasta vacío</label>
-              <span className="value">{stats?.timeUntilEmpty || 'N/A'}</span>
+      {/* Estadísticas */}
+      {stats && (
+        <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
+          <div style={{ padding: '12px', backgroundColor: '#ffffff', borderRadius: '6px', textAlign: 'center' }}>
+            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Máximo</div>
+            <div style={{ fontSize: '20px', fontWeight: '700', color: '#22c55e' }}>
+              {stats.max}%
             </div>
           </div>
-        </div>
 
-        <div className="info-card alert-card">
-          <h4>⚠️ Estado</h4>
-          <div className="alert" style={{ borderColor: alert?.color }}>
-            <div className="alert-icon">{alert?.icon}</div>
-            <div className="alert-content">
-              <p className="alert-label">{alert?.label}</p>
-              <p className="alert-message">
-                {stats?.current >= 75
-                  ? 'Batería en excelente estado'
-                  : stats?.current >= 50
-                  ? 'Batería en buen nivel, considera cargar pronto'
-                  : stats?.current >= 25
-                  ? '⚠️ Batería baja, carga recomendada'
-                  : '🚨 Batería crítica, carga inmediatamente'}
-              </p>
+          <div style={{ padding: '12px', backgroundColor: '#ffffff', borderRadius: '6px', textAlign: 'center' }}>
+            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Promedio</div>
+            <div style={{ fontSize: '20px', fontWeight: '700', color: '#f59e0b' }}>
+              {stats.average}%
+            </div>
+          </div>
+
+          <div style={{ padding: '12px', backgroundColor: '#ffffff', borderRadius: '6px', textAlign: 'center' }}>
+            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Mínimo</div>
+            <div style={{ fontSize: '20px', fontWeight: '700', color: '#ef4444' }}>
+              {stats.min}%
+            </div>
+          </div>
+
+          <div style={{ padding: '12px', backgroundColor: '#ffffff', borderRadius: '6px', textAlign: 'center' }}>
+            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Drenaje</div>
+            <div style={{ fontSize: '20px', fontWeight: '700', color: '#8b5cf6' }}>
+              {stats.drainRate}%/h
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Botón de refrescar */}
+      <button
+        onClick={refresh}
+        style={{
+          marginTop: '16px',
+          padding: '8px 16px',
+          fontSize: '12px',
+          fontWeight: '600',
+          border: '1px solid #d1d5db',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          backgroundColor: '#ffffff',
+          color: '#1f2937',
+          transition: 'all 0.2s'
+        }}
+        onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+        onMouseOut={(e) => e.target.style.backgroundColor = '#ffffff'}
+      >
+        🔄 Refrescar datos
+      </button>
     </div>
   );
 };

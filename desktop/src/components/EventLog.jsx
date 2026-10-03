@@ -1,273 +1,153 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import '../styles/EventLog.css';
+import React, { useState } from 'react';
+import useEventLog from '../hooks/useEventLog';
 
-const EventLog = ({ deviceId = 'sky-l-90-up-left' }) => {
-  const [events, setEvents] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [filter, setFilter] = useState({ type: '', severity: '', limit: 50 });
-  const [sortOrder, setSortOrder] = useState('desc');
+const EventLog = ({ deviceId, userId = 'user-001' }) => {
+  const { events, loading, error, filterByType, filterBySeverity, search, clearFilters, deleteEvent } = useEventLog(deviceId, userId);
+  const [activeFilterType, setActiveFilterType] = useState(null);
+  const [activeFilterSeverity, setActiveFilterSeverity] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const EVENT_TYPES = {
-    device_connected: { icon: '🔗', label: 'Dispositivo Conectado', color: 'success' },
-    device_disconnected: { icon: '🔌', label: 'Dispositivo Desconectado', color: 'danger' },
-    volume_changed: { icon: '🔊', label: 'Volumen Cambiado', color: 'info' },
-    program_switched: { icon: '🎵', label: 'Programa Cambiado', color: 'info' },
-    battery_low: { icon: '🟡', label: 'Batería Baja', color: 'warning' },
-    battery_critical: { icon: '🔴', label: 'Batería Crítica', color: 'danger' },
-    mute_toggled: { icon: '🔇', label: 'Silencio Activado/Desactivado', color: 'info' },
-    error: { icon: '❌', label: 'Error', color: 'danger' },
-    settings_changed: { icon: '⚙️', label: 'Configuración Cambiada', color: 'warning' },
-    firmware_update: { icon: '📦', label: 'Actualización de Firmware', color: 'success' },
-    sync_started: { icon: '🔄', label: 'Sincronización Iniciada', color: 'info' },
-    sync_completed: { icon: '✓', label: 'Sincronización Completada', color: 'success' }
+  const eventsPerPage = 10;
+  const totalPages = Math.ceil(events.length / eventsPerPage);
+  const startIdx = (currentPage - 1) * eventsPerPage;
+  const paginatedEvents = events.slice(startIdx, startIdx + eventsPerPage);
+
+  const getTypeIcon = (type) => {
+    const icons = { battery: '🔋', program_switch: '🎵', volume: '🔊', connection: '🔌', error: '❌' };
+    return icons[type] || '📝';
   };
 
-  // Load events and stats on mount and when filter changes
-  useEffect(() => {
-    fetchEvents();
-    fetchStats();
-  }, [deviceId]);
-
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      let url = `/api/v1/devices/${deviceId}/events?limit=${filter.limit}`;
-
-      if (filter.type) url += `&type=${filter.type}`;
-      if (filter.severity) url += `&severity=${filter.severity}`;
-
-      const response = await axios.get(url);
-
-      if (response.data.data) {
-        let eventsData = response.data.data;
-
-        // Sort by timestamp
-        eventsData.sort((a, b) => {
-          const timeA = new Date(a.timestamp).getTime();
-          const timeB = new Date(b.timestamp).getTime();
-          return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
-        });
-
-        setEvents(eventsData);
-      }
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching events:', err);
-      setError('No se pudieron cargar los eventos');
-    } finally {
-      setLoading(false);
-    }
+  const getSeverityColor = (severity) => {
+    const colors = { critical: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+    return colors[severity] || '#6b7280';
   };
 
-  const fetchStats = async () => {
-    try {
-      const response = await axios.get(`/api/v1/devices/${deviceId}/events/stats`);
-      if (response.data.stats) {
-        setStats(response.data.stats);
-      }
-    } catch (err) {
-      console.error('Error fetching stats:', err);
-    }
-  };
-
-  const handleExport = async () => {
-    try {
-      let url = `/api/v1/devices/${deviceId}/events/export`;
-
-      if (filter.type) url += `?type=${filter.type}`;
-      if (filter.severity) url += `${filter.type ? '&' : '?'}severity=${filter.severity}`;
-
-      // Trigger download
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `events-${deviceId}-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error('Error exporting events:', err);
-      setError('Error al exportar eventos');
-    }
-  };
-
-  const handleClearOld = async () => {
-    if (window.confirm('¿Eliminar eventos más antiguos de 30 días?')) {
-      try {
-        await axios.delete(`/api/v1/devices/${deviceId}/events/clear?days=30`);
-        fetchEvents();
-        fetchStats();
-      } catch (err) {
-        console.error('Error clearing events:', err);
-        setError('Error al limpiar eventos');
-      }
-    }
-  };
-
-  const getEventInfo = (type) => EVENT_TYPES[type] || { icon: '📌', label: type, color: 'default' };
-
-  const getSeverityIcon = (severity) => {
-    const icons = {
-      critical: '🔴',
-      error: '❌',
-      warning: '🟡',
-      info: 'ℹ️'
-    };
-    return icons[severity] || '📌';
-  };
+  if (loading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Cargando eventos...</div>;
+  }
 
   return (
-    <div className="event-log">
+    <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+      <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: '700' }}>Historial de Eventos</h2>
+
+      <div style={{ marginBottom: '16px' }}>
+        <input
+          type="text"
+          placeholder="Buscar eventos..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            if (e.target.value) search(e.target.value);
+            else clearFilters();
+            setCurrentPage(1);
+          }}
+          style={{
+            width: '100%',
+            padding: '8px 12px',
+            border: '1px solid #d1d5db',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontFamily: 'inherit'
+          }}
+        />
+      </div>
+
       {error && (
-        <div className="error-banner">
-          ⚠️ {error}
-          <button onClick={() => setError(null)} className="close">✕</button>
+        <div style={{ padding: '12px', backgroundColor: '#fee2e2', borderRadius: '4px', color: '#991b1b', marginBottom: '16px' }}>
+          Error: {error}
         </div>
       )}
 
-      {/* Controls */}
-      <div className="event-controls">
-        <div className="filter-group">
-          <label>Tipo de evento:</label>
-          <select
-            value={filter.type}
-            onChange={(e) => setFilter({ ...filter, type: e.target.value })}
-          >
-            <option value="">Todos los eventos</option>
-            <option value="device_connected">Conexión</option>
-            <option value="program_switched">Programas</option>
-            <option value="volume_changed">Volumen</option>
-            <option value="battery_low">Batería</option>
-            <option value="settings_changed">Configuración</option>
-            <option value="error">Errores</option>
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label>Severidad:</label>
-          <select
-            value={filter.severity}
-            onChange={(e) => setFilter({ ...filter, severity: e.target.value })}
-          >
-            <option value="">Todas</option>
-            <option value="critical">Crítico</option>
-            <option value="error">Error</option>
-            <option value="warning">Advertencia</option>
-            <option value="info">Información</option>
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label>Ordenar:</label>
-          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-            <option value="desc">Más recientes primero</option>
-            <option value="asc">Más antiguos primero</option>
-          </select>
-        </div>
-
-        <button className="btn secondary" onClick={handleExport} title="Descargar como CSV">
-          📥 Exportar
-        </button>
-
-        <button className="btn secondary" onClick={handleClearOld} title="Eliminar eventos >30 días">
-          🗑️ Limpiar
-        </button>
-      </div>
-
-      {/* Events List */}
-      <div className="events-list">
-        {loading ? (
-          <div className="loading">Cargando eventos...</div>
-        ) : events.length > 0 ? (
-          events.map((event) => {
-            const eventInfo = getEventInfo(event.type);
-            const eventTime = new Date(event.timestamp);
-            const timeStr = eventTime.toLocaleString('es-ES', {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
-            });
-
-            return (
-              <div
-                key={event.id}
-                className={`event-item ${eventInfo.color} severity-${event.severity}`}
-              >
-                <div className="event-marker">
-                  <span className="event-icon">{eventInfo.icon}</span>
+      <div style={{ backgroundColor: '#ffffff', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+        {paginatedEvents.length === 0 ? (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
+            No hay eventos que mostrar
+          </div>
+        ) : (
+          paginatedEvents.map((event, idx) => (
+            <div
+              key={event.id || idx}
+              style={{
+                padding: '12px 16px',
+                borderBottom: idx < paginatedEvents.length - 1 ? '1px solid #f3f4f6' : 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start'
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '14px' }}>{getTypeIcon(event.type)}</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>{event.title || event.type}</span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: getSeverityColor(event.severity),
+                      color: '#ffffff',
+                      fontWeight: '600'
+                    }}
+                  >
+                    {event.severity}
+                  </span>
                 </div>
-
-                <div className="event-content">
-                  <div className="event-main">
-                    <h5>{eventInfo.label}</h5>
-                    {event.data && event.data.message && (
-                      <p className="event-message">{event.data.message}</p>
-                    )}
-                    {event.data && Object.keys(event.data).length > 0 && (
-                      <div className="event-data">
-                        {Object.entries(event.data).map(([key, value]) =>
-                          key !== 'message' && (
-                            <span key={key} className="data-item">
-                              {key}: <strong>{String(value)}</strong>
-                            </span>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="event-meta">
-                    <small className="event-time">📅 {timeStr}</small>
-                    <span className="event-id">{event.id.substring(0, 12)}...</span>
-                  </div>
+                <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '4px' }}>
+                  {event.message}
                 </div>
-
-                <div className="event-severity">
-                  {getSeverityIcon(event.severity)}
+                <div style={{ fontSize: '11px', color: '#9ca3af' }}>
+                  {new Date(event.timestamp).toLocaleString('es-ES')}
                 </div>
               </div>
-            );
-          })
-        ) : (
-          <div className="no-events">
-            <p>📭 No hay eventos con este filtro</p>
-          </div>
+
+              {event.id && (
+                <button
+                  onClick={() => deleteEvent(event.id)}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '3px',
+                    backgroundColor: '#f3f4f6',
+                    cursor: 'pointer',
+                    marginLeft: '12px',
+                    color: '#6b7280'
+                  }}
+                >
+                  Eliminar
+                </button>
+              )}
+            </div>
+          ))
         )}
       </div>
 
-      {/* Statistics */}
-      {stats && (
-        <div className="event-stats">
-          <div className="stat-card">
-            <label>📊 Total</label>
-            <span className="value">{stats.totalEvents}</span>
-          </div>
-          <div className="stat-card">
-            <label>⚠️ Advertencias</label>
-            <span className="value">{stats.bySeverity.warning || 0}</span>
-          </div>
-          <div className="stat-card">
-            <label>❌ Errores</label>
-            <span className="value">{stats.bySeverity.error || 0}</span>
-          </div>
-          <div className="stat-card">
-            <label>🔴 Críticos</label>
-            <span className="value">{stats.bySeverity.critical || 0}</span>
-          </div>
-          {stats.lastEvent && (
-            <div className="stat-card">
-              <label>⏰ Último evento</label>
-              <span className="value">
-                {new Date(stats.lastEvent.timestamp).toLocaleTimeString('es-ES')}
-              </span>
-            </div>
-          )}
+      {totalPages > 1 && (
+        <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              style={{
+                padding: '6px 10px',
+                fontSize: '12px',
+                border: '1px solid #d1d5db',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                backgroundColor: currentPage === page ? '#2563eb' : '#ffffff',
+                color: currentPage === page ? '#ffffff' : '#1f2937'
+              }}
+            >
+              {page}
+            </button>
+          ))}
         </div>
       )}
+
+      <div style={{ marginTop: '12px', fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
+        Mostrando {startIdx + 1}-{Math.min(startIdx + eventsPerPage, events.length)} de {events.length} eventos
+      </div>
     </div>
   );
 };

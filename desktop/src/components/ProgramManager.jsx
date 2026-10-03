@@ -1,203 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import '../styles/ProgramManager.css';
+import React, { useState } from 'react';
+import useDeviceStatus from '../hooks/useDeviceStatus';
 
-const ProgramManager = ({ deviceId = 'sky-l-90-up-left' }) => {
-  const [programs, setPrograms] = useState([]);
-  const [currentProgram, setCurrentProgram] = useState(null);
+const ProgramManager = ({ deviceId, userId = 'user-001' }) => {
+  const { device, updateProgram, connected } = useDeviceStatus(deviceId, userId);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedProgram, setSelectedProgram] = useState(null);
 
-  // Load programs on mount
-  useEffect(() => {
-    fetchPrograms();
-  }, [deviceId]);
+  const programs = [
+    { id: 'conversation', name: 'Conversación', icon: '👥', description: 'Optimizado para conversación', category: 'standard' },
+    { id: 'outdoor', name: 'Aire Libre', icon: '🌳', description: 'Mejor para ambientes ruidosos', category: 'standard' },
+    { id: 'quiet', name: 'Silencio', icon: '🤫', description: 'Amplificación reducida', category: 'standard' },
+    { id: 'music', name: 'Música', icon: '🎵', description: 'Frecuencias balanceadas', category: 'entertainment' },
+    { id: 'phone', name: 'Telefonía', icon: '📱', description: 'Optimizado para llamadas', category: 'communication' },
+    { id: 'custom', name: 'Personalizado', icon: '⚙️', description: 'Tu configuración', category: 'custom' }
+  ];
 
-  const fetchPrograms = async () => {
+  const handleProgramChange = async (programId) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await axios.get(
-        `/api/v1/devices/${deviceId}/programs`
-      );
-
-      if (response.data.programs) {
-        setPrograms(response.data.programs);
-        setCurrentProgram(response.data.activeProgram);
-        setSelectedProgram(response.data.activeProgram);
-      }
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching programs:', err);
-      setError('No se pudieron cargar los programas');
-    } finally {
+      updateProgram(programId);
+      setTimeout(() => setLoading(false), 500);
+    } catch (error) {
+      console.error('Error changing program:', error);
       setLoading(false);
     }
   };
-
-  const handleSwitchProgram = async (programId) => {
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        `/api/v1/devices/${deviceId}/programs/${programId}/switch`
-      );
-
-      if (response.data.success) {
-        setCurrentProgram(programId);
-        setSelectedProgram(programId);
-        console.log(`✓ Programa cambiado a: ${programId}`);
-      }
-      setError(null);
-    } catch (err) {
-      console.error('Error switching program:', err);
-      setError(`Error al cambiar programa: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const currentProgramData = programs.find(p => p.id === selectedProgram);
-
-  if (error && !programs.length) {
-    return (
-      <div className="program-manager error">
-        <div className="error-message">⚠️ {error}</div>
-        <button onClick={fetchPrograms} className="btn primary">
-          Reintentar
-        </button>
-      </div>
-    );
-  }
 
   return (
-    <div className="program-manager">
-      {error && (
-        <div className="error-banner">
-          ⚠️ {error}
-          <button onClick={() => setError(null)} className="close">✕</button>
+    <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ margin: '0', fontSize: '20px', fontWeight: '700' }}>Gestor de Programas</h2>
+        <div style={{
+          fontSize: '12px',
+          padding: '4px 12px',
+          borderRadius: '12px',
+          backgroundColor: connected ? '#dcfce7' : '#fecaca',
+          color: connected ? '#166534' : '#991b1b',
+          fontWeight: '600'
+        }}>
+          {connected ? '✅ Conectado' : '❌ Desconectado'}
+        </div>
+      </div>
+
+      {device && (
+        <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#e0f2fe', borderRadius: '6px', border: '1px solid #0284c7' }}>
+          <div style={{ fontSize: '12px', color: '#0c4a6e', fontWeight: '600' }}>
+            Programa Actual: {device.currentProgram || 'N/A'}
+          </div>
         </div>
       )}
 
-      <div className="grid-2col">
-        {/* Program List */}
-        <div className="program-list">
-          <h3>🎵 Programas Disponibles</h3>
-          <div className="programs">
-            {programs.length > 0 ? (
-              programs.map(program => (
-                <button
-                  key={program.id}
-                  className={`program-item ${selectedProgram === program.id ? 'selected' : ''} ${currentProgram === program.id ? 'active' : ''}`}
-                  onClick={() => setSelectedProgram(program.id)}
-                  disabled={loading}
-                  title={program.description}
-                >
-                  <span className="program-icon">{program.icon}</span>
-                  <div className="program-text">
-                    <div className="program-name">{program.name}</div>
-                    <div className="program-category">{program.category}</div>
-                  </div>
-                  {currentProgram === program.id && (
-                    <span className="active-badge">✓ Activo</span>
-                  )}
-                </button>
-              ))
-            ) : (
-              <div className="empty">Cargando programas...</div>
-            )}
-          </div>
-        </div>
-
-        {/* Program Details */}
-        <div className="program-details">
-          <h3>📊 Detalles del Programa</h3>
-          {currentProgramData ? (
-            <div className="details-panel">
-              <div className="program-header">
-                <span className="icon">{currentProgramData.icon}</span>
-                <div>
-                  <h4>{currentProgramData.name}</h4>
-                  <p className="description">{currentProgramData.description}</p>
-                  <span className="category-badge">{currentProgramData.category}</span>
-                </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+        {programs.map((program) => {
+          const isSelected = device?.currentProgram === program.id;
+          return (
+            <button
+              key={program.id}
+              onClick={() => handleProgramChange(program.id)}
+              disabled={loading || !connected}
+              style={{
+                padding: '16px',
+                backgroundColor: isSelected ? '#2563eb' : '#ffffff',
+                border: isSelected ? '2px solid #2563eb' : '1px solid #d1d5db',
+                borderRadius: '8px',
+                cursor: connected && !loading ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s',
+                opacity: !connected ? 0.6 : 1,
+                textAlign: 'center'
+              }}
+              onMouseOver={(e) => {
+                if (connected && !loading) {
+                  e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                }
+              }}
+              onMouseOut={(e) => {
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              <div style={{ fontSize: '32px', marginBottom: '8px' }}>
+                {program.icon}
               </div>
-
-              {/* Frequency Response Chart */}
-              <div className="settings-section">
-                <h5>Respuesta de Frecuencia</h5>
-                <div className="frequency-grid">
-                  {currentProgramData.frequency?.map((freq, idx) => (
-                    <div key={idx} className="frequency-item">
-                      <label>{freq}Hz</label>
-                      <div className="gain-bar">
-                        <div
-                          className="gain-fill"
-                          style={{ height: `${(currentProgramData.gain[idx] / 25) * 100}%` }}
-                        />
-                      </div>
-                      <span className="gain-value">{currentProgramData.gain[idx]}dB</span>
-                    </div>
-                  ))}
-                </div>
+              <div style={{
+                fontSize: '14px',
+                fontWeight: '700',
+                color: isSelected ? '#ffffff' : '#1f2937',
+                marginBottom: '4px'
+              }}>
+                {program.name}
               </div>
-
-              {/* Statistics */}
-              <div className="settings-section">
-                <h5>Estadísticas</h5>
-                <div className="stats-grid">
-                  <div className="stat">
-                    <label>Ganancia Promedio</label>
-                    <span className="value">
-                      {Math.round(
-                        currentProgramData.gain.reduce((a, b) => a + b) / currentProgramData.gain.length
-                      )}dB
-                    </span>
-                  </div>
-                  <div className="stat">
-                    <label>Ganancia Máxima</label>
-                    <span className="value">
-                      {Math.max(...currentProgramData.gain)}dB
-                    </span>
-                  </div>
-                  <div className="stat">
-                    <label>Ganancia Mínima</label>
-                    <span className="value">
-                      {Math.min(...currentProgramData.gain)}dB
-                    </span>
-                  </div>
-                  <div className="stat">
-                    <label>Rango de Frecuencias</label>
-                    <span className="value">
-                      {Math.min(...currentProgramData.frequency)}-{Math.max(...currentProgramData.frequency)}Hz
-                    </span>
-                  </div>
-                </div>
+              <div style={{
+                fontSize: '11px',
+                color: isSelected ? '#e0e7ff' : '#6b7280',
+                lineHeight: '1.3'
+              }}>
+                {program.description}
               </div>
+            </button>
+          );
+        })}
+      </div>
 
-              {/* Action Buttons */}
-              <div className="program-actions">
-                {currentProgram === selectedProgram ? (
-                  <button className="btn primary active" disabled>
-                    ✓ Programa Activo
-                  </button>
-                ) : (
-                  <button
-                    className="btn primary"
-                    onClick={() => handleSwitchProgram(selectedProgram)}
-                    disabled={loading}
-                  >
-                    {loading ? '⏳ Cambiando...' : '🎵 Activar Programa'}
-                  </button>
-                )}
-                <button className="btn secondary" disabled>
-                  ⚙️ Editar Personalizado (Phase 3)
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="empty">Selecciona un programa para ver detalles</div>
-          )}
-        </div>
+      <div style={{ marginTop: '20px', padding: '12px', backgroundColor: '#f0f9ff', borderRadius: '6px', fontSize: '12px', color: '#0369a1' }}>
+        <strong>Tip:</strong> Puedes cambiar programas en cualquier momento. Los cambios se sincronizan automáticamente con tu dispositivo.
       </div>
     </div>
   );

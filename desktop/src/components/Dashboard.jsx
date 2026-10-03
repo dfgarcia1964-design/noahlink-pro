@@ -1,314 +1,199 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import '../styles/Dashboard.css';
 import DeviceCard from './DeviceCard';
 import RealtimeMonitor from './RealtimeMonitor';
 import BatteryChart from './BatteryChart';
-import BatteryPrediction from './BatteryPrediction';
-import ProgramManager from './ProgramManager';
 import EventLog from './EventLog';
-import ProgramEditor from './ProgramEditor';
-import AdvancedAnalytics from './AdvancedAnalytics';
-import UserProfiles from './UserProfiles';
-import Settings from './Settings';
-import DarkModeToggle from './DarkModeToggle';
-import AlertsCenter from './AlertsCenter';
-import VolumeSlider from './VolumeSlider';
+import ProgramManager from './ProgramManager';
 
-const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [batterySubTab, setBatterySubTab] = useState('history');
-  const [device, setDevice] = useState(null);
-  const [batteryHistory, setBatteryHistory] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user-001' }) => {
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [activeTab, setActiveTab] = useState('monitor');
   const [darkMode, setDarkMode] = useState(false);
 
-  // Fetch device status and battery history on mount
   useEffect(() => {
-    const fetchDeviceStatus = async () => {
-      try {
-        const response = await axios.get('/api/v1/devices');
-        if (response.data.devices && response.data.devices.length > 0) {
-          const connectedDevice = response.data.devices[0];
-          setDevice(connectedDevice);
-          setConnectionStatus('connected');
-
-          // Fetch real battery history from API
-          await fetchBatteryHistory(connectedDevice.id);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching device:', error);
-        setConnectionStatus('error');
-        setLoading(false);
-      }
-    };
-
-    const fetchBatteryHistory = async (deviceId) => {
-      try {
-        const response = await axios.get(
-          `/api/v1/devices/${deviceId}/battery/history?hours=24`
-        );
-        if (response.data.data && response.data.data.length > 0) {
-          setBatteryHistory(response.data.data);
-        } else {
-          // Fallback to mock data if no real history
-          generateMockBatteryHistory(deviceId);
-        }
-      } catch (error) {
-        console.error('Error fetching battery history:', error);
-        // Fallback to mock if API fails
-        generateMockBatteryHistory(deviceId);
-      }
-    };
-
-    fetchDeviceStatus();
-
-    // Poll device status every 30 seconds
-    const interval = setInterval(fetchDeviceStatus, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Generate mock battery history for testing
-  const generateMockBatteryHistory = (deviceId) => {
-    const history = [];
-    const now = Date.now();
-    const oneHourMs = 60 * 60 * 1000;
-
-    for (let i = 24; i >= 0; i--) {
-      const timestamp = new Date(now - i * oneHourMs);
-      const battery = Math.max(0, Math.min(100, 85 - (24 - i) * 3 + Math.random() * 10));
-
-      history.push({
-        timestamp: timestamp.toISOString(),
-        level: Math.round(battery),
-        deviceId: deviceId
-      });
+    if (devices.length > 0 && !selectedDevice) {
+      setSelectedDevice(devices[0].id);
     }
+  }, [devices, selectedDevice]);
 
-    setBatteryHistory(history);
+  const currentDevice = devices.find((d) => d.id === selectedDevice);
+
+  const tabs = [
+    { id: 'monitor', label: 'Monitor en Vivo', icon: '📊' },
+    { id: 'battery', label: 'Batería', icon: '🔋' },
+    { id: 'events', label: 'Eventos', icon: '📝' },
+    { id: 'programs', label: 'Programas', icon: '🎵' }
+  ];
+
+  const bgColor = darkMode ? '#1f2937' : '#f3f4f6';
+  const textColor = darkMode ? '#ffffff' : '#1f2937';
+  const cardBg = darkMode ? '#374151' : '#ffffff';
+
+  const headerStyle = {
+    backgroundColor: '#2563eb',
+    color: '#ffffff',
+    padding: '20px 24px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
   };
 
-  // Simulate events
-  useEffect(() => {
-    const mockEvents = [
-      {
-        id: 'evt-001',
-        type: 'device_connected',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        message: 'Dispositivo conectado',
-        severity: 'info'
-      },
-      {
-        id: 'evt-002',
-        type: 'volume_changed',
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
-        message: 'Volumen cambiado a 75%',
-        severity: 'info'
-      },
-      {
-        id: 'evt-003',
-        type: 'battery_low',
-        timestamp: new Date(Date.now() - 900000).toISOString(),
-        message: 'Batería baja: 25%',
-        severity: 'warning'
-      }
-    ];
+  const mainStyle = {
+    minHeight: '100vh',
+    backgroundColor: bgColor,
+    color: textColor,
+    transition: 'background-color 0.3s, color 0.3s'
+  };
 
-    setEvents(mockEvents);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="dashboard loading">
-        <div className="spinner">Cargando...</div>
-      </div>
-    );
-  }
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: devices.length > 0 ? '300px 1fr' : '1fr',
+    gap: '24px'
+  };
 
   return (
-    <div className="dashboard">
-      {/* Header */}
-      <div className="dashboard-header">
-        <h1>📊 Panel de Control</h1>
-        <div className="header-controls">
-          <DarkModeToggle onToggle={setDarkMode} />
-          <div className={`status-indicator ${connectionStatus}`}>
-            <span className="status-dot"></span>
-            {connectionStatus === 'connected' && 'Conectado'}
-            {connectionStatus === 'disconnected' && 'Desconectado'}
-            {connectionStatus === 'error' && 'Error'}
+    <div style={mainStyle}>
+      <div style={headerStyle}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1 style={{ margin: '0', fontSize: '28px', fontWeight: '700' }}>
+                🎧 NoahLink Pro Dashboard
+              </h1>
+              <p style={{ margin: '4px 0 0 0', fontSize: '14px', opacity: 0.9 }}>
+                Control en tiempo real de tus dispositivos Phonak
+              </p>
+            </div>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                borderRadius: '4px',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontWeight: '600'
+              }}
+            >
+              {darkMode ? '☀️ Claro' : '🌙 Oscuro'}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="dashboard-tabs">
-        <button
-          className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          📈 Resumen
-        </button>
-        <button
-          className={`tab ${activeTab === 'battery' ? 'active' : ''}`}
-          onClick={() => setActiveTab('battery')}
-        >
-          🔋 Batería
-        </button>
-        <button
-          className={`tab ${activeTab === 'programs' ? 'active' : ''}`}
-          onClick={() => setActiveTab('programs')}
-        >
-          🎵 Programas
-        </button>
-        <button
-          className={`tab ${activeTab === 'events' ? 'active' : ''}`}
-          onClick={() => setActiveTab('events')}
-        >
-          📋 Eventos
-        </button>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+        {error && (
+          <div style={{
+            padding: '16px',
+            backgroundColor: '#fee2e2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            color: '#991b1b',
+            marginBottom: '20px',
+            fontWeight: '500'
+          }}>
+            Error: {error}
+          </div>
+        )}
 
-        {/* PHASE 3 TABS */}
-        <button
-          className={`tab ${activeTab === 'editor' ? 'active' : ''}`}
-          onClick={() => setActiveTab('editor')}
-        >
-          ✎ Editor
-        </button>
-        <button
-          className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          📈 Análisis
-        </button>
-        <button
-          className={`tab ${activeTab === 'perfiles' ? 'active' : ''}`}
-          onClick={() => setActiveTab('perfiles')}
-        >
-          👤 Perfiles
-        </button>
-        <button
-          className={`tab ${activeTab === 'alertas' ? 'active' : ''}`}
-          onClick={() => setActiveTab('alertas')}
-        >
-          🔔 Alertas
-        </button>
-        <button
-          className={`tab ${activeTab === 'configuracion' ? 'active' : ''}`}
-          onClick={() => setActiveTab('configuracion')}
-        >
-          ⚙️ Config
-        </button>
-      </div>
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '40px', fontSize: '16px' }}>
+            Cargando dispositivos...
+          </div>
+        )}
 
-      {/* Tab Content */}
-      <div className="dashboard-content">
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="tab-panel overview active">
-            {device ? (
-              <div className="grid-2col">
-                <DeviceCard device={device} />
-                <RealtimeMonitor device={device} batteryHistory={batteryHistory} />
-                <VolumeSlider deviceId="sky-l-90-up-left" />
+        <div style={gridStyle}>
+          {devices.length > 0 && (
+            <div>
+              <h2 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '700' }}>
+                Mis Dispositivos ({devices.length})
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {devices.map((device) => (
+                  <div key={device.id} onClick={() => setSelectedDevice(device.id)}>
+                    <DeviceCard
+                      device={device}
+                      isSelected={selectedDevice === device.id}
+                      onClick={() => setSelectedDevice(device.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            {currentDevice ? (
+              <div>
+                <h2 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '700' }}>
+                  {currentDevice.name} Panel de Control
+                </h2>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  marginBottom: '20px',
+                  borderBottom: '2px solid #e5e7eb'
+                }}>
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      style={{
+                        padding: '12px 16px',
+                        backgroundColor: activeTab === tab.id ? '#2563eb' : 'transparent',
+                        color: activeTab === tab.id ? '#ffffff' : textColor,
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        fontSize: '14px'
+                      }}
+                    >
+                      {tab.icon} {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div>
+                  {activeTab === 'monitor' && (
+                    <RealtimeMonitor deviceId={currentDevice.id} userId={userId} />
+                  )}
+                  {activeTab === 'battery' && (
+                    <BatteryChart deviceId={currentDevice.id} />
+                  )}
+                  {activeTab === 'events' && (
+                    <EventLog deviceId={currentDevice.id} userId={userId} />
+                  )}
+                  {activeTab === 'programs' && (
+                    <ProgramManager deviceId={currentDevice.id} userId={userId} />
+                  )}
+                </div>
               </div>
             ) : (
-              <div style={{ padding: '40px', textAlign: 'center' }}>Conectando...</div>
+              <div style={{
+                padding: '40px 20px',
+                textAlign: 'center',
+                backgroundColor: cardBg,
+                borderRadius: '8px'
+              }}>
+                <p style={{ fontSize: '16px', color: '#6b7280' }}>
+                  {devices.length === 0 ? 'No hay dispositivos' : 'Selecciona un dispositivo'}
+                </p>
+              </div>
             )}
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Battery Tab */}
-        {activeTab === 'battery' && (
-          <div className="tab-panel battery">
-            <div className="battery-subtabs">
-              <button
-                className={`subtab ${batterySubTab === 'history' ? 'active' : ''}`}
-                onClick={() => setBatterySubTab('history')}
-              >
-                📊 Historial
-              </button>
-              <button
-                className={`subtab ${batterySubTab === 'prediction' ? 'active' : ''}`}
-                onClick={() => setBatterySubTab('prediction')}
-              >
-                🔮 Predicción
-              </button>
-            </div>
-
-            {batteryHistory.length > 0 ? (
-              <>
-                {batterySubTab === 'history' && <BatteryChart data={batteryHistory} />}
-                {batterySubTab === 'prediction' && <BatteryPrediction data={batteryHistory} />}
-              </>
-            ) : (
-              <div style={{ padding: '40px', textAlign: 'center' }}>Cargando datos de batería...</div>
-            )}
-          </div>
-        )}
-
-        {/* Programs Tab */}
-        {activeTab === 'programs' && (
-          <div className="tab-panel programs">
-            <h2>Gestión de Programas</h2>
-            {device ? (
-              <ProgramManager deviceId={device.id} />
-            ) : (
-              <div style={{ padding: '40px', textAlign: 'center' }}>Conecta un dispositivo primero</div>
-            )}
-          </div>
-        )}
-
-        {/* Events Tab */}
-        {activeTab === 'events' && (
-          <div className="tab-panel events">
-            <h2>Historial de Eventos</h2>
-            <EventLog events={events} />
-          </div>
-        )}
-
-        {/* PHASE 3 TABS */}
-
-        {/* Program Editor Tab */}
-        {activeTab === 'editor' && (
-          <div className="tab-panel editor active">
-            <ProgramEditor onSave={(program) => {
-              console.log('Programa guardado:', program);
-              alert('✓ Programa guardado: ' + program.name);
-            }} />
-          </div>
-        )}
-
-        {/* Advanced Analytics Tab */}
-        {activeTab === 'analytics' && (
-          <div className="tab-panel analytics active">
-            <AdvancedAnalytics batteryHistory={batteryHistory} />
-          </div>
-        )}
-
-        {/* User Profiles Tab */}
-        {activeTab === 'perfiles' && (
-          <div className="tab-panel perfiles active">
-            <UserProfiles />
-          </div>
-        )}
-
-        {/* Alerts Tab */}
-        {activeTab === 'alertas' && (
-          <div className="tab-panel alertas active">
-            <AlertsCenter />
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {activeTab === 'configuracion' && (
-          <div className="tab-panel configuracion active">
-            <Settings onDarkModeChange={setDarkMode} />
-          </div>
-        )}
+      <div style={{
+        backgroundColor: cardBg,
+        borderTop: '1px solid #e5e7eb',
+        padding: '20px 24px',
+        textAlign: 'center',
+        color: '#6b7280',
+        fontSize: '12px',
+        marginTop: '40px'
+      }}>
+        <p>NoahLink Pro v1.0 - Datos en tiempo real</p>
       </div>
     </div>
   );
