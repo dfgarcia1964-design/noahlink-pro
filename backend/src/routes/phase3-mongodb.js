@@ -8,13 +8,20 @@ const {
   BatteryHistory
 } = require('../models');
 
-const userId = 'user-001'; // TODO: Get from auth middleware
+// Helper middleware to extract userId from auth
+const extractUserId = (req, res, next) => {
+  req.userId = req.userId || 'user-001'; // Fallback for development
+  next();
+};
+
+router.use(extractUserId);
 
 // ==================== PROGRAMS ====================
 
 // GET all programs
 router.get('/programs', async (req, res) => {
   try {
+    const { userId } = req;
     const programs = await Program.find({ userId }).sort({ createdAt: -1 });
     res.json({
       success: true,
@@ -29,6 +36,7 @@ router.get('/programs', async (req, res) => {
 // GET single program
 router.get('/programs/:programId', async (req, res) => {
   try {
+    const { userId } = req;
     const program = await Program.findById(req.params.programId);
     if (!program || program.userId !== userId) {
       return res.status(404).json({ success: false, error: 'Program not found' });
@@ -42,6 +50,7 @@ router.get('/programs/:programId', async (req, res) => {
 // CREATE program
 router.post('/programs', async (req, res) => {
   try {
+    const { userId } = req;
     const { name, frequencies, description } = req.body;
 
     if (!name || !frequencies) {
@@ -70,6 +79,7 @@ router.post('/programs', async (req, res) => {
 // UPDATE program
 router.put('/programs/:programId', async (req, res) => {
   try {
+    const { userId } = req;
     const program = await Program.findById(req.params.programId);
 
     if (!program || program.userId !== userId) {
@@ -98,6 +108,7 @@ router.put('/programs/:programId', async (req, res) => {
 // DELETE program
 router.delete('/programs/:programId', async (req, res) => {
   try {
+    const { userId } = req;
     const program = await Program.findByIdAndDelete(req.params.programId);
 
     if (!program || program.userId !== userId) {
@@ -119,6 +130,7 @@ router.delete('/programs/:programId', async (req, res) => {
 // GET battery trends
 router.get('/analytics/trends', async (req, res) => {
   try {
+    const { userId } = req;
     const timeRange = req.query.range || '24h';
     let hoursBack = 24;
 
@@ -184,6 +196,7 @@ router.get('/analytics/trends', async (req, res) => {
 // GET battery distribution
 router.get('/analytics/distribution', async (req, res) => {
   try {
+    const { userId } = req;
     const history = await BatteryHistory.find({ userId });
 
     if (history.length === 0) {
@@ -218,6 +231,7 @@ router.get('/analytics/distribution', async (req, res) => {
 // GET insights
 router.get('/analytics/insights', async (req, res) => {
   try {
+    const { userId } = req;
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const history = await BatteryHistory.find({
       userId,
@@ -262,6 +276,7 @@ router.get('/analytics/insights', async (req, res) => {
 // GET all profiles
 router.get('/profiles', async (req, res) => {
   try {
+    const { userId } = req;
     const profiles = await Profile.find({ userId }).sort({ createdAt: -1 });
     res.json({
       success: true,
@@ -276,6 +291,7 @@ router.get('/profiles', async (req, res) => {
 // GET single profile
 router.get('/profiles/:profileId', async (req, res) => {
   try {
+    const { userId } = req;
     const profile = await Profile.findById(req.params.profileId);
     if (!profile || profile.userId !== userId) {
       return res.status(404).json({ success: false, error: 'Profile not found' });
@@ -289,6 +305,7 @@ router.get('/profiles/:profileId', async (req, res) => {
 // CREATE profile
 router.post('/profiles', async (req, res) => {
   try {
+    const { userId } = req;
     const { name, device, programs } = req.body;
 
     if (!name || !device) {
@@ -318,6 +335,7 @@ router.post('/profiles', async (req, res) => {
 // UPDATE profile
 router.put('/profiles/:profileId', async (req, res) => {
   try {
+    const { userId } = req;
     const profile = await Profile.findById(req.params.profileId);
 
     if (!profile || profile.userId !== userId) {
@@ -353,6 +371,7 @@ router.put('/profiles/:profileId', async (req, res) => {
 // DELETE profile
 router.delete('/profiles/:profileId', async (req, res) => {
   try {
+    const { userId } = req;
     const profile = await Profile.findByIdAndDelete(req.params.profileId);
 
     if (!profile || profile.userId !== userId) {
@@ -374,6 +393,7 @@ router.delete('/profiles/:profileId', async (req, res) => {
 // GET settings
 router.get('/settings', async (req, res) => {
   try {
+    const { userId } = req;
     let settings = await Settings.findOne({ userId });
 
     if (!settings) {
@@ -393,6 +413,7 @@ router.get('/settings', async (req, res) => {
 // UPDATE settings
 router.put('/settings', async (req, res) => {
   try {
+    const { userId } = req;
     let settings = await Settings.findOne({ userId });
 
     if (!settings) {
@@ -416,6 +437,7 @@ router.put('/settings', async (req, res) => {
 // RESET settings
 router.post('/settings/reset', async (req, res) => {
   try {
+    const { userId } = req;
     const defaults = {
       autoConnect: true,
       updateFrequency: 30,
@@ -455,6 +477,7 @@ router.post('/settings/reset', async (req, res) => {
 // GET alerts
 router.get('/alerts', async (req, res) => {
   try {
+    const { userId } = req;
     const { type, read } = req.query;
     let query = { userId };
 
@@ -478,6 +501,7 @@ router.get('/alerts', async (req, res) => {
 // GET single alert
 router.get('/alerts/:alertId', async (req, res) => {
   try {
+    const { userId } = req;
     const alert = await Alert.findById(req.params.alertId);
     if (!alert || alert.userId !== userId) {
       return res.status(404).json({ success: false, error: 'Alert not found' });
@@ -491,6 +515,7 @@ router.get('/alerts/:alertId', async (req, res) => {
 // CREATE alert
 router.post('/alerts', async (req, res) => {
   try {
+    const { userId } = req;
     const { type, severity, title, message } = req.body;
 
     if (!type || !severity || !title || !message) {
@@ -520,6 +545,7 @@ router.post('/alerts', async (req, res) => {
 // UPDATE alert
 router.put('/alerts/:alertId', async (req, res) => {
   try {
+    const { userId } = req;
     const alert = await Alert.findById(req.params.alertId);
 
     if (!alert || alert.userId !== userId) {
@@ -546,6 +572,7 @@ router.put('/alerts/:alertId', async (req, res) => {
 // DELETE alert
 router.delete('/alerts/:alertId', async (req, res) => {
   try {
+    const { userId } = req;
     const alert = await Alert.findByIdAndDelete(req.params.alertId);
 
     if (!alert || alert.userId !== userId) {
@@ -565,6 +592,7 @@ router.delete('/alerts/:alertId', async (req, res) => {
 // MARK ALL as read
 router.post('/alerts/mark-all/read', async (req, res) => {
   try {
+    const { userId } = req;
     await Alert.updateMany({ userId }, { read: true });
 
     res.json({
@@ -579,6 +607,7 @@ router.post('/alerts/mark-all/read', async (req, res) => {
 // DELETE ALL alerts
 router.delete('/alerts', async (req, res) => {
   try {
+    const { userId } = req;
     const result = await Alert.deleteMany({ userId });
 
     res.json({
