@@ -2,12 +2,12 @@
 > noahlink-pro-backend@0.1.0 start
 > node src/index.js
 
-⚠️  MongoDB no disponible, usando mock data
-   Intenta instalar MongoDB localmente o usa: mongodb://localhost:27017/noahlink-pro
-🔍 Scanning for devices on win32...
-✅ Found 2 device(s) via NoahLink Wireless
-🎧 Found 2 hearing aid(s)
-
+⚠️  MongoDB no disponible, usando mock data 
+⚠️  Intenta instalar MongoDB localmente o usa: mongodb://localhost:27017/noahlink-pro 
+ℹ️  Scanning for devices on win32... 
+✅ Found 2 device(s) via NoahLink Wireless 
+ℹ️  Found 2 hearing aid(s) 
+✅ 
 ╔════════════════════════════════════════════════════════╗
 ║          NoahLink Pro Backend Server                  ║
 ║          Version 0.5.0 - JWT Authentication           ║
@@ -21,89 +21,47 @@
    • Phonak Sky L 90-UP (L) (Sky L 90-UP) - Batería: 99%
    • Phonak Sky L 90-UP (R) (Sky L 90-UP) - Batería: 99%
 
-📚 ENDPOINTS DISPONIBLES:
-
-Phase 1 (Device Control):
-  • GET    /api/v1/devices
-  • POST   /api/v1/devices/:deviceId/connect
-  • POST   /api/v1/devices/:deviceId/disconnect
-  • GET    /api/v1/devices/:deviceId/status
-  • GET    /api/v1/devices/:deviceId/battery
-  • POST   /api/v1/devices/:deviceId/volume
-
-Phase 3 (Advanced Features):
-  📋 Programs:
-    • GET    /api/v1/programs
-    • GET    /api/v1/programs/:programId
-    • POST   /api/v1/programs
-    • PUT    /api/v1/programs/:programId
-    • DELETE /api/v1/programs/:programId
-
-  📊 Analytics:
-    • GET    /api/v1/analytics/trends
-    • GET    /api/v1/analytics/distribution
-    • GET    /api/v1/analytics/insights
-
-  👤 Profiles:
-    • GET    /api/v1/profiles
-    • GET    /api/v1/profiles/:profileId
-    • POST   /api/v1/profiles
-    • PUT    /api/v1/profiles/:profileId
-    • DELETE /api/v1/profiles/:profileId
-
-  ⚙️ Settings:
-    • GET    /api/v1/settings
-    • PUT    /api/v1/settings
-    • POST   /api/v1/settings/reset
-
-  🔔 Alerts:
-    • GET    /api/v1/alerts
-    • GET    /api/v1/alerts/:alertId
-    • POST   /api/v1/alerts
-    • PUT    /api/v1/alerts/:alertId
-    • DELETE /api/v1/alerts/:alertId
-    • POST   /api/v1/alerts/mark-all/read
-    • DELETE /api/v1/alerts (delete all)
-
 📡 Test: curl http://localhost:3000/health
-  
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices HTTP/1.1" 200 458 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=24 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-🔊 Initialized volume for sky-l-90-up-left: 75%
-🔊 Initialized volume for [object Object]: 75%
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 200 195 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:50 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices HTTP/1.1" 200 458 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=24 HTTP/1.1" 200 77 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 200 76 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 200 195 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:51 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery HTTP/1.1" 200 145 "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/battery/history?hours=4 HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:52 +0000] "GET /api/v1/devices/sky-l-90-up-left/volume HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.228 Electron/26.6.10 Safari/537.36"
-::1 - - [03/Oct/2026:13:07:55 +0000] "GET /health HTTP/1.1" 200 81 "-" "curl/8.21.0"
-::1 - - [03/Oct/2026:13:07:56 +0000] "GET /api/v1/devices HTTP/1.1" 200 458 "-" "curl/8.21.0"
-::1 - - [03/Oct/2026:13:08:32 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:09:32 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:10:32 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:11:24 +0000] "GET /health HTTP/1.1" 200 81 "-" "curl/8.21.0"
-::1 - - [03/Oct/2026:13:11:24 +0000] "GET /api/v1/devices HTTP/1.1" 200 458 "-" "curl/8.21.0"
-::1 - - [03/Oct/2026:13:12:12 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:13:13 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:14:14 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:15:15 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:16:16 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:18:12 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:19:13 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:20:14 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:21:15 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:22:16 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
-::1 - - [03/Oct/2026:13:24:12 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+   
+Error reading battery history: TypeError: history.filter is not a function
+    at BatteryManager.getHistory (C:\Users\dfgar\Projects\noahlink-pro\backend\src\services\battery-manager.js:86:25)
+    at C:\Users\dfgar\Projects\noahlink-pro\backend\src\index.js:128:36
+    at Layer.handle [as handle_request] (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:284:15
+    at param (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:365:14)
+    at param (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:376:14)
+    at router.process_params (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:421:3)
+::1 - - [03/Oct/2026:13:45:04 +0000] "GET /api/v1/devices/device-sky-l-90-up-left/battery/history?hours=24 HTTP/1.1" 200 84 "-" "curl/8.21.0"
+ℹ️  Battery stats retrieved for device-sky-l-90-up-left {
+  current: 75,
+  average: 88,
+  min: 75,
+  max: 100,
+  trend: 'declining',
+  recordCount: 6,
+  timeRange: '24h'
+}
+::1 - - [03/Oct/2026:13:45:04 +0000] "GET /api/v1/devices/device-sky-l-90-up-left/battery/stats HTTP/1.1" 200 180 "-" "curl/8.21.0"
+Error getting events by device: TypeError: allEvents.filter is not a function
+    at EventManager.getEventsByDeviceId (C:\Users\dfgar\Projects\noahlink-pro\backend\src\services\event-manager.js:84:38)
+    at C:\Users\dfgar\Projects\noahlink-pro\backend\src\index.js:280:29
+    at Layer.handle [as handle_request] (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:284:15
+    at param (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:365:14)
+    at param (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:376:14)
+    at router.process_params (C:\Users\dfgar\Projects\noahlink-pro\backend\node_modules\express\lib\router\index.js:421:3)
+::1 - - [03/Oct/2026:13:45:04 +0000] "GET /api/v1/devices/device-sky-l-90-up-left/events HTTP/1.1" 200 86 "-" "curl/8.21.0"
+::1 - - [03/Oct/2026:13:45:22 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:45:52 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:46:32 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:46:53 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:47:22 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:47:52 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:48:32 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"
+::1 - - [03/Oct/2026:13:49:32 +0000] "GET /api/v1/devices HTTP/1.1" 304 - "http://localhost:3001/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"

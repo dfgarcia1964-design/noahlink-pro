@@ -11,11 +11,34 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/noahlink-pro';
 
+// Phase 2: WebSocket setup
+const http = require('http');
+const socketIo = require('socket.io');
+const WebSocketManager = require('./services/websocket-manager');
+
+// Create HTTP server for Socket.io
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+    methods: ['GET', 'POST']
+  },
+  transports: ['websocket', 'polling']
+});
+
+// Initialize WebSocket Manager
+const wsManager = new WebSocketManager(io);
+wsManager.initializeServer();
+
+// Make wsManager available globally
+global.wsManager = wsManager;
+
 // Import routes
 const authRoutes = require('./routes/auth-mock'); // Using mock auth while MongoDB is unavailable
 const phase3Routes = require('./routes/phase3-mongodb');
 const batteryRoutes = require('./routes/battery'); // Phase 2: Battery history
 const eventsRoutes = require('./routes/events'); // Phase 2: Event logging
+const websocketRoutes = require('./routes/websocket'); // Phase 2: WebSocket management
 const { verifyToken } = require('./middleware/auth');
 const deviceDetector = require('./services/device-detector');
 const volumeManager = require('./services/volume-manager');
@@ -623,6 +646,9 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/devices/:deviceId/battery', batteryRoutes);
 app.use('/api/v1/devices/:deviceId/events', eventsRoutes);
 
+// ==================== PHASE 2 ROUTES - WEBSOCKET ====================
+app.use('/api/v1/websocket', websocketRoutes);
+
 // ==================== PHASE 3 ROUTES (PROTECTED) ====================
 app.use('/api/v1', verifyToken, phase3Routes);
 
@@ -645,7 +671,7 @@ const connectMongoDB = async () => {
 
 // ==================== SERVER ====================
 
-const server = app.listen(PORT, async () => {
+server.listen(PORT, async () => {
   const dbConnected = await connectMongoDB();
 
   // Initialize device detection
@@ -654,17 +680,20 @@ const server = app.listen(PORT, async () => {
   logger.success(`
 ╔════════════════════════════════════════════════════════╗
 ║          NoahLink Pro Backend Server                  ║
-║          Version 0.5.0 - JWT Authentication           ║
+║          Version 0.5.0 - JWT + WebSocket              ║
 ║          🎧 Real Device Detection Enabled             ║
+║          📡 Real-time Updates (WebSocket)              ║
 ╚════════════════════════════════════════════════════════╝
 
 ✅ Servidor escuchando en puerto ${PORT}
 ${dbConnected ? '✅ MongoDB conectado' : '📝 Usando mock data (MongoDB no disponible)'}
 🔐 JWT Authentication habilitado
+📡 WebSocket habilitado (ws://localhost:${PORT})
 🎧 Audífonos detectados: ${devices.length}
 ${devices.length > 0 ? devices.map(d => `   • ${d.name} (${d.model}) - Batería: ${d.battery}%`).join('\n') : '   (Sin audífonos disponibles)'}
 
-📡 Test: curl http://localhost:${PORT}/health
+📡 Test REST: curl http://localhost:${PORT}/health
+📡 Test WebSocket: ws://localhost:${PORT}
   `);
 });
 
