@@ -15,6 +15,13 @@ const authRoutes = require('./routes/auth-mock'); // Using mock auth while Mongo
 const phase3Routes = require('./routes/phase3-mongodb');
 const { verifyToken } = require('./middleware/auth');
 const deviceDetector = require('./services/device-detector');
+const volumeManager = require('./services/volume-manager');
+const batteryManager = require('./services/battery-manager');
+const analyticsService = require('./services/analytics');
+const eventManager = require('./services/event-manager');
+const customProgramsManager = require('./services/custom-programs');
+const profilesManager = require('./services/profiles-manager');
+const programManager = require('./services/program-manager');
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:3001' }));
@@ -97,7 +104,6 @@ app.get('/api/v1/devices/:deviceId/status', async (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/battery', async (req, res) => {
   try {
-    const batteryManager = require('./services/battery-manager');
     const level = batteryManager.getBatteryLevel(req.params.deviceId);
     const status = batteryManager.getBatteryStatus(level);
 
@@ -116,7 +122,6 @@ app.get('/api/v1/devices/:deviceId/battery', async (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/battery/history', async (req, res) => {
   try {
-    const batteryManager = require('./services/battery-manager');
     const hours = parseInt(req.query.hours) || 24;
     const history = batteryManager.getHistory(req.params.deviceId, hours);
 
@@ -134,7 +139,6 @@ app.get('/api/v1/devices/:deviceId/battery/history', async (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/volume', async (req, res) => {
   try {
-    const volumeManager = require('./services/volume-manager');
     const currentVolume = volumeManager.getVolume(req.params.deviceId) || 50;
     res.json({
       success: true,
@@ -153,7 +157,6 @@ app.post('/api/v1/devices/:deviceId/volume', async (req, res) => {
     if (typeof volume !== 'number' || volume < 0 || volume > 100) {
       return res.status(400).json({ error: 'Invalid volume (0-100)' });
     }
-    const volumeManager = require('./services/volume-manager');
     volumeManager.setVolume(req.params.deviceId, volume);
     const result = await deviceDetector.setVolume(req.params.deviceId, volume);
     res.json({
@@ -170,7 +173,6 @@ app.post('/api/v1/devices/:deviceId/volume', async (req, res) => {
 // ==================== PROGRAM ENDPOINTS ====================
 app.get('/api/v1/programs', (req, res) => {
   try {
-    const programManager = require('./services/program-manager');
     const programs = programManager.getAllPrograms();
     res.json({
       success: true,
@@ -184,7 +186,6 @@ app.get('/api/v1/programs', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/programs', (req, res) => {
   try {
-    const programManager = require('./services/program-manager');
     const programs = programManager.getAllPrograms();
     const activeProgram = programManager.getActiveProgram(req.params.deviceId);
 
@@ -202,7 +203,6 @@ app.get('/api/v1/devices/:deviceId/programs', (req, res) => {
 
 app.post('/api/v1/devices/:deviceId/programs/:programId/switch', (req, res) => {
   try {
-    const programManager = require('./services/program-manager');
     const result = programManager.switchProgram(
       req.params.deviceId,
       req.params.programId
@@ -222,7 +222,6 @@ app.post('/api/v1/devices/:deviceId/programs/:programId/switch', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/programs/:programId', (req, res) => {
   try {
-    const programManager = require('./services/program-manager');
     const program = programManager.getProgram(req.params.programId);
 
     if (!program) {
@@ -244,7 +243,6 @@ app.get('/api/v1/devices/:deviceId/programs/:programId', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/programs/history/:limit?', (req, res) => {
   try {
-    const programManager = require('./services/program-manager');
     const limit = parseInt(req.params.limit) || 20;
     const history = programManager.getProgramHistory(req.params.deviceId, limit);
 
@@ -262,7 +260,6 @@ app.get('/api/v1/devices/:deviceId/programs/history/:limit?', (req, res) => {
 // ==================== EVENT LOGGING ENDPOINTS ====================
 app.get('/api/v1/devices/:deviceId/events', (req, res) => {
   try {
-    const eventManager = require('./services/event-manager');
     const limit = parseInt(req.query.limit) || 50;
     const type = req.query.type;
     const severity = req.query.severity;
@@ -296,7 +293,6 @@ app.get('/api/v1/devices/:deviceId/events', (req, res) => {
 app.post('/api/v1/devices/:deviceId/events/log', (req, res) => {
   try {
     const { type, severity, data } = req.body;
-    const eventManager = require('./services/event-manager');
 
     const event = eventManager.logEvent(
       req.params.deviceId,
@@ -316,7 +312,6 @@ app.post('/api/v1/devices/:deviceId/events/log', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/events/stats', (req, res) => {
   try {
-    const eventManager = require('./services/event-manager');
     const stats = eventManager.getEventStats(req.params.deviceId);
 
     res.json({
@@ -331,7 +326,6 @@ app.get('/api/v1/devices/:deviceId/events/stats', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/events/export', (req, res) => {
   try {
-    const eventManager = require('./services/event-manager');
     const filter = {
       type: req.query.type,
       severity: req.query.severity,
@@ -351,7 +345,6 @@ app.get('/api/v1/devices/:deviceId/events/export', (req, res) => {
 
 app.delete('/api/v1/devices/:deviceId/events/clear', (req, res) => {
   try {
-    const eventManager = require('./services/event-manager');
     const days = parseInt(req.query.days) || 30;
     const result = eventManager.clearOldEvents(req.params.deviceId, days);
 
@@ -367,7 +360,6 @@ app.delete('/api/v1/devices/:deviceId/events/clear', (req, res) => {
 // ==================== CUSTOM PROGRAMS ENDPOINTS ====================
 app.get('/api/v1/devices/:deviceId/custom-programs', (req, res) => {
   try {
-    const customProgramsManager = require('./services/custom-programs');
     const programs = customProgramsManager.getAllCustomPrograms(req.params.deviceId);
 
     res.json({
@@ -383,7 +375,6 @@ app.get('/api/v1/devices/:deviceId/custom-programs', (req, res) => {
 
 app.post('/api/v1/devices/:deviceId/custom-programs', (req, res) => {
   try {
-    const customProgramsManager = require('./services/custom-programs');
     const { name, description, icon, frequency, gain, metadata } = req.body;
 
     // Validate
@@ -423,7 +414,6 @@ app.post('/api/v1/devices/:deviceId/custom-programs', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
   try {
-    const customProgramsManager = require('./services/custom-programs');
     const program = customProgramsManager.getCustomProgram(
       req.params.deviceId,
       req.params.programId
@@ -447,7 +437,6 @@ app.get('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
 
 app.put('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
   try {
-    const customProgramsManager = require('./services/custom-programs');
     const { name, description, icon, frequency, gain, metadata } = req.body;
 
     // Validate if provided
@@ -483,7 +472,6 @@ app.put('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
 
 app.delete('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) => {
   try {
-    const customProgramsManager = require('./services/custom-programs');
     const result = customProgramsManager.deleteProgram(
       req.params.deviceId,
       req.params.programId
@@ -500,8 +488,6 @@ app.delete('/api/v1/devices/:deviceId/custom-programs/:programId', (req, res) =>
 
 app.post('/api/v1/devices/:deviceId/custom-programs/:programId/duplicate', (req, res) => {
   try {
-    const customProgramsManager = require('./services/custom-programs');
-    const programManager = require('./services/program-manager');
 
     const sourceProgram =
       customProgramsManager.getCustomProgram(req.params.deviceId, req.params.programId) ||
@@ -529,7 +515,6 @@ app.post('/api/v1/devices/:deviceId/custom-programs/:programId/duplicate', (req,
 
 app.post('/api/v1/devices/:deviceId/custom-programs/:programId/activate', (req, res) => {
   try {
-    const customProgramsManager = require('./services/custom-programs');
     const program = customProgramsManager.activateProgram(
       req.params.deviceId,
       req.params.programId
@@ -547,9 +532,6 @@ app.post('/api/v1/devices/:deviceId/custom-programs/:programId/activate', (req, 
 // ==================== ANALYTICS ENDPOINTS ====================
 app.get('/api/v1/devices/:deviceId/analytics/summary', (req, res) => {
   try {
-    const analyticsService = require('./services/analytics');
-    const eventManager = require('./services/event-manager');
-    const batteryManager = require('./services/battery-manager');
 
     const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
     const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
@@ -568,9 +550,6 @@ app.get('/api/v1/devices/:deviceId/analytics/summary', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/analytics/insights', (req, res) => {
   try {
-    const analyticsService = require('./services/analytics');
-    const eventManager = require('./services/event-manager');
-    const batteryManager = require('./services/battery-manager');
 
     const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
     const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
@@ -589,10 +568,6 @@ app.get('/api/v1/devices/:deviceId/analytics/insights', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/analytics/recommendations', (req, res) => {
   try {
-    const analyticsService = require('./services/analytics');
-    const eventManager = require('./services/event-manager');
-    const batteryManager = require('./services/battery-manager');
-    const programManager = require('./services/program-manager');
 
     const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
     const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
@@ -615,9 +590,6 @@ app.get('/api/v1/devices/:deviceId/analytics/recommendations', (req, res) => {
 
 app.get('/api/v1/devices/:deviceId/analytics/health', (req, res) => {
   try {
-    const analyticsService = require('./services/analytics');
-    const eventManager = require('./services/event-manager');
-    const batteryManager = require('./services/battery-manager');
 
     const events = eventManager.getEventsByDeviceId(req.params.deviceId, 500);
     const batteryHistory = batteryManager.getHistory(req.params.deviceId, 24);
