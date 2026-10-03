@@ -20,7 +20,6 @@ const batteryManager = require('./services/battery-manager');
 const analyticsService = require('./services/analytics');
 const eventManager = require('./services/event-manager');
 const customProgramsManager = require('./services/custom-programs');
-const profilesManager = require('./services/profiles-manager');
 const programManager = require('./services/program-manager');
 
 app.use(helmet());
