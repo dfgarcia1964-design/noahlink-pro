@@ -639,17 +639,13 @@ app.get('/api/v1/devices/:deviceId/analytics/health', (req, res) => {
   }
 });
 
-// ==================== AUTHENTICATION ROUTES ====================
+// ==================== PUBLIC ROUTES (NO AUTH) ====================
 app.use('/api/v1/auth', authRoutes);
-
-// ==================== PHASE 2 ROUTES - BATTERY & EVENTS ====================
+app.use('/api/v1/websocket', websocketRoutes);
 app.use('/api/v1/devices/:deviceId/battery', batteryRoutes);
 app.use('/api/v1/devices/:deviceId/events', eventsRoutes);
 
-// ==================== PHASE 2 ROUTES - WEBSOCKET ====================
-app.use('/api/v1/websocket', websocketRoutes);
-
-// ==================== PHASE 3 ROUTES (PROTECTED) ====================
+// ==================== PROTECTED ROUTES ====================
 app.use('/api/v1', verifyToken, phase3Routes);
 
 // ==================== MONGODB CONNECTION ====================
