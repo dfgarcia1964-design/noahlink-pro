@@ -32,16 +32,9 @@ const FirmwareInfo = ({ device }) => {
   const handleUpdate = () => {
     if (!hasUpdate) return;
 
-    // Confirmación
-    const confirmed = window.confirm(
-      `¿Actualizar firmware de ${fw.current} a ${fw.latest}?\n\nEsta operación puede tomar 5-10 minutos.`
-    );
-
-    if (!confirmed) return;
-
     setUpdating(true);
 
-    // Simular actualización
+    // Simular actualización (3 segundos)
     setTimeout(() => {
       // Actualizar versión actual
       globalFirmwareState[device.id].current = globalFirmwareState[device.id].latest;
@@ -50,11 +43,11 @@ const FirmwareInfo = ({ device }) => {
       setUpdating(false);
       setUpdateSuccess(true);
 
-      // Mostrar éxito
-      alert(`✅ ¡Firmware actualizado exitosamente!\n\nAhora ejecutando v${fw.latest}\nDispositivo: ${device.name}`);
-
       // Limpiar el mensaje después de 5 segundos
       setTimeout(() => setUpdateSuccess(false), 5000);
+
+      // Recargar para mostrar cambios
+      setTimeout(() => window.location.reload(), 1000);
     }, 3000);
   };
 
