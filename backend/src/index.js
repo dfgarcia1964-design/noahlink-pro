@@ -37,6 +37,7 @@ global.wsManager = wsManager;
 const authRoutes = require('./routes/auth-mock'); // Using mock auth while MongoDB is unavailable
 const phase3Routes = require('./routes/phase3-mongodb');
 const phase2ControlRoutes = require('./routes/phase2-control'); // Phase 2: Real device control
+const diagnosticsRoutes = require('./routes/diagnostics'); // Diagnostics: Bluetooth status
 const batteryRoutes = require('./routes/battery'); // Phase 2: Battery history
 const eventsRoutes = require('./routes/events'); // Phase 2: Event logging
 const websocketRoutes = require('./routes/websocket'); // Phase 2: WebSocket management
@@ -670,6 +671,9 @@ app.use('/api/v1/devices/:deviceId/events', eventsRoutes);
 
 // ==================== PHASE 2: DEVICE CONTROL ROUTES ====================
 app.use('/api', phase2ControlRoutes);
+
+// ==================== DIAGNOSTICS ROUTES ====================
+app.use('/api', diagnosticsRoutes);
 
 // ==================== PROTECTED ROUTES ====================
 app.use('/api/v1', verifyToken, phase3Routes);
