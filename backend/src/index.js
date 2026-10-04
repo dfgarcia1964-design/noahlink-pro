@@ -673,7 +673,7 @@ app.use('/api/v1/devices/:deviceId/events', eventsRoutes);
 app.use('/api', phase2ControlRoutes);
 
 // ==================== DIAGNOSTICS ROUTES ====================
-app.use('/api', diagnosticsRoutes);
+app.use('/api/diagnostics', diagnosticsRoutes);
 
 // ==================== PROTECTED ROUTES ====================
 app.use('/api/v1', verifyToken, phase3Routes);
