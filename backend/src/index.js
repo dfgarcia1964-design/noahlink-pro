@@ -74,6 +74,27 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date(), bluetooth: connectedDevice ? 'connected' : 'disconnected' });
 });
 
+// NEW: Get current app mode (REAL or DEMO)
+app.get('/api/status/mode', (req, res) => {
+  try {
+    const modeStatus = deviceDetector.getModeStatus();
+    res.json({
+      success: true,
+      mode: modeStatus.mode,
+      deviceCount: modeStatus.deviceCount,
+      isScanning: modeStatus.isScanning,
+      connectedCount: modeStatus.connectedCount,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    logger.error('Error getting mode status', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get mode status'
+    });
+  }
+});
+
 app.get('/api/v1/devices', async (req, res) => {
   try {
     const devices = detectedDevices.length > 0 ? detectedDevices : await initializeDevices();

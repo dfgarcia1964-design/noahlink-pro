@@ -1,296 +1,115 @@
 /**
  * Device Detector Service
- * Detects Phonak hearing aids connected via NoahLink Wireless
- * Supports Windows, macOS, and Linux
+ * Detects REAL Phonak hearing aids via Bluetooth (Windows native)
+ * Falls back to demo mode if no devices found
  */
 
-const os = require('os');
-const { exec } = require('child_process');
-const util = require('util');
-const execPromise = util.promisify(exec);
+const realDetector = require('../bluetooth/real-detector');
 const logger = require('../utils/logger');
 
 class DeviceDetector {
   constructor() {
-    this.platform = os.platform();
     this.devices = [];
     this.isScanning = false;
+    this.demoMode = false;
   }
 
   /**
-   * Scan for connected devices
+   * Scan for connected devices (REAL Bluetooth)
    */
   async scanDevices() {
     this.isScanning = true;
 
     try {
-      logger.info(`Scanning for devices on ${this.platform}...`);
+      logger.info('🔍 Scanning for REAL Bluetooth devices...');
 
-      if (this.platform === 'win32') {
-        const devices = await this.scanWindowsDevices();
-        this.devices = devices;
-        return devices;
-      } else if (this.platform === 'darwin') {
-        const devices = await this.scanMacDevices();
-        this.devices = devices;
-        return devices;
-      } else if (this.platform === 'linux') {
-        const devices = await this.scanLinuxDevices();
-        this.devices = devices;
-        return devices;
+      // Intentar detectar dispositivos Phonak reales
+      const realDevices = await realDetector.scanDevices();
+
+      if (realDevices && realDevices.length > 0) {
+        logger.success(`✅ Found ${realDevices.length} REAL Phonak device(s)`);
+        this.devices = realDevices;
+        this.demoMode = false;
+        return realDevices;
+      } else {
+        logger.warn('⚠️  No real Phonak devices found. Using DEMO mode.');
+        this.devices = this.getDemoDevices();
+        this.demoMode = true;
+        return this.devices;
       }
-
-      return [];
     } catch (error) {
       logger.error('Error scanning devices', error.message);
-      return [];
+      logger.warn('Falling back to demo mode');
+      this.devices = this.getDemoDevices();
+      this.demoMode = true;
+      return this.devices;
     } finally {
       this.isScanning = false;
     }
   }
 
   /**
-   * Scan Windows devices via NoahLink Wireless
+   * Demo devices (fallback when no real devices found)
    */
-  async scanWindowsDevices() {
-    // Return Phonak Sky L 90-UP devices (user's actual devices)
-    const devices = [
+  getDemoDevices() {
+    return [
       {
-        id: 'sky-l-90-up-left',
-        name: 'Phonak Sky L 90-UP (L)',
+        id: 'device-1',
+        name: 'Phonak Sky L (L)',
         model: 'Sky L 90-UP',
         firmware: '1.0.4.0',
         battery: 99,
         rssi: -48,
         serial: '2346X3WUN',
         side: 'Izquierdo',
-        source: 'NoahLink Wireless'
+        source: 'Demo Mode'
       },
       {
-        id: 'sky-l-90-up-right',
-        name: 'Phonak Sky L 90-UP (R)',
+        id: 'device-2',
+        name: 'Phonak Sky L (R)',
         model: 'Sky L 90-UP',
         firmware: '1.0.4.0',
         battery: 99,
         rssi: -45,
         serial: '2344X0TMU',
         side: 'Derecho',
-        source: 'NoahLink Wireless'
+        source: 'Demo Mode'
       }
     ];
-
-    logger.success(`Found ${devices.length} device(s) via NoahLink Wireless`);
-    return devices;
   }
 
   /**
-   * Get devices from NoahLink Wireless
-   */
-  async getNoahLinkDevices() {
-    try {
-      // Check for NoahLink Wireless in Program Files or simulate based on user device
-      try {
-        const { stdout } = await execPromise(
-          'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Phonak\\Noah Link" /v "DeviceList"',
-          { encoding: 'utf-8' }
-        );
-
-        if (stdout.includes('DeviceList')) {
-          // Device found in registry
-        }
-      } catch (e) {
-        // Registry not found, but we'll provide Sky 90 as the expected device
-      }
-
-      // Return Phonak Sky 90 devices (user's actual device)
-      const devices = [
-        {
-          id: 'sky-90-left',
-          name: 'Phonak Sky 90 (L)',
-          model: 'Sky 90',
-          firmware: '5.1.2',
-          battery: 85,
-          rssi: -55,
-          serial: 'PH-SKY90-L-001',
-          side: 'left',
-          source: 'NoahLink Wireless'
-        },
-        {
-          id: 'sky-90-right',
-          name: 'Phonak Sky 90 (R)',
-          model: 'Sky 90',
-          firmware: '5.1.2',
-          battery: 88,
-          rssi: -52,
-          serial: 'PH-SKY90-R-001',
-          side: 'right',
-          source: 'NoahLink Wireless'
-        }
-      ];
-
-      return devices;
-    } catch (error) {
-      // Return Sky 90 by default
-      const devices = [
-        {
-          id: 'sky-90-left',
-          name: 'Phonak Sky 90 (L)',
-          model: 'Sky 90',
-          firmware: '5.1.2',
-          battery: 85,
-          rssi: -55,
-          serial: 'PH-SKY90-L-001',
-          side: 'left',
-          source: 'NoahLink Wireless'
-        },
-        {
-          id: 'sky-90-right',
-          name: 'Phonak Sky 90 (R)',
-          model: 'Sky 90',
-          firmware: '5.1.2',
-          battery: 88,
-          rssi: -52,
-          serial: 'PH-SKY90-R-001',
-          side: 'right',
-          source: 'NoahLink Wireless'
-        }
-      ];
-
-      return devices;
-    }
-  }
-
-  /**
-   * Get Bluetooth devices on Windows
-   */
-  async getBluetoothDevices() {
-    try {
-      // PowerShell command to list Bluetooth devices
-      const { stdout } = await execPromise(
-        'powershell -Command "Get-CimInstance -Class Win32_PnPDevice -Filter \'(PNPClass = \\\"Bluetooth\\\") AND (Manufacturer = \\\"Phonak\\\")\'"',
-        { encoding: 'utf-8' }
-      );
-
-      if (stdout && stdout.length > 0) {
-        // Parse output
-        const devices = [];
-        // Parse PowerShell output and create device objects
-        return devices;
-      }
-
-      return [];
-    } catch (error) {
-      return [];
-    }
-  }
-
-  /**
-   * Scan macOS devices
-   */
-  async scanMacDevices() {
-    try {
-      // Use ioreg or system_profiler for macOS
-      const { stdout } = await execPromise(
-        'system_profiler SPBluetoothDataType',
-        { encoding: 'utf-8' }
-      );
-
-      const devices = [];
-
-      if (stdout.includes('Phonak') || stdout.includes('Sky 90')) {
-        devices.push({
-          id: 'sky-90-mac',
-          name: 'Phonak Sky 90',
-          model: 'Sky 90',
-          firmware: '5.1.2',
-          battery: 87,
-          rssi: -54,
-          serial: 'PH-SKY90-MAC-001',
-          source: 'macOS Bluetooth'
-        });
-      }
-
-      return devices;
-    } catch (error) {
-      return [];
-    }
-  }
-
-  /**
-   * Scan Linux devices
-   */
-  async scanLinuxDevices() {
-    try {
-      // Use bluetoothctl on Linux
-      const { stdout } = await execPromise(
-        'bluetoothctl paired-devices',
-        { encoding: 'utf-8' }
-      );
-
-      const devices = [];
-      const lines = stdout.split('\n');
-
-      for (const line of lines) {
-        if (line.includes('Phonak') || line.includes('Sky')) {
-          const parts = line.split(' ');
-          if (parts.length >= 2) {
-            devices.push({
-              id: parts[1],
-              name: line.substring(line.indexOf(' ') + 1),
-              model: 'Sky 90',
-              firmware: '5.1.2',
-              battery: 85,
-              rssi: -55,
-              serial: parts[1],
-              source: 'Linux Bluetooth'
-            });
-          }
-        }
-      }
-
-      return devices;
-    } catch (error) {
-      return [];
-    }
-  }
-
-  /**
-   * Get device details
+   * Get device details (REAL or DEMO)
    */
   async getDeviceDetails(deviceId) {
     try {
-      const device = this.devices.find(d => d.id === deviceId);
+      let device = this.devices.find(d => d.id === deviceId);
 
       if (!device) {
         return null;
       }
 
+      // Use real detector for more details if available
+      const realDetails = await realDetector.getDeviceDetails(deviceId);
+      if (realDetails) {
+        return realDetails;
+      }
+
+      // Fallback to demo details
       return {
         ...device,
         status: 'connected',
         lastSync: new Date(),
         battery: {
-          level: device.battery,
+          level: device.battery || 85,
           voltage: 3.8,
           temperature: 25,
           charging: false
         },
         programs: [
-          {
-            number: 1,
-            name: 'Automático',
-            active: true
-          },
-          {
-            number: 2,
-            name: 'Tranquilo',
-            active: false
-          },
-          {
-            number: 3,
-            name: 'Ruidoso',
-            active: false
-          }
+          { number: 1, name: 'Automático', active: true },
+          { number: 2, name: 'Conversation', active: false },
+          { number: 3, name: 'Music', active: false }
         ]
       };
     } catch (error) {
@@ -300,22 +119,15 @@ class DeviceDetector {
   }
 
   /**
-   * Connect to device
+   * Connect to device (REAL Bluetooth)
    */
   async connectDevice(deviceId) {
     try {
-      const device = await this.getDeviceDetails(deviceId);
-
-      if (!device) {
-        throw new Error(`Device ${deviceId} not found`);
+      const result = await realDetector.connectDevice(deviceId);
+      if (result.success) {
+        logger.success(`✅ Connected to device`);
       }
-
-      logger.success(`Connected to ${device.name}`);
-      return {
-        success: true,
-        device,
-        connectedAt: new Date()
-      };
+      return result;
     } catch (error) {
       logger.error('Error connecting to device', error.message);
       return {
@@ -330,11 +142,8 @@ class DeviceDetector {
    */
   async disconnectDevice(deviceId) {
     try {
-      logger.info(`Disconnected from device ${deviceId}`);
-      return {
-        success: true,
-        deviceId
-      };
+      const result = await realDetector.disconnectDevice(deviceId);
+      return result;
     } catch (error) {
       logger.error('Error disconnecting', error.message);
       return {
@@ -345,22 +154,30 @@ class DeviceDetector {
   }
 
   /**
-   * Set volume on device
+   * Set volume on device (REAL Bluetooth)
    */
   async setVolume(deviceId, volume) {
     try {
-      if (volume < 0 || volume > 100) {
-        throw new Error('Volume must be between 0 and 100');
-      }
-
-      logger.info(`Set volume to ${volume}% on ${deviceId}`);
-      return {
-        success: true,
-        deviceId,
-        volume
-      };
+      const result = await realDetector.setVolume(deviceId, volume);
+      return result;
     } catch (error) {
       logger.error('Error setting volume', error.message);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Switch audio program (REAL Bluetooth)
+   */
+  async switchProgram(deviceId, programName) {
+    try {
+      const result = await realDetector.switchProgram(deviceId, programName);
+      return result;
+    } catch (error) {
+      logger.error('Error switching program', error.message);
       return {
         success: false,
         error: error.message
@@ -382,8 +199,8 @@ class DeviceDetector {
       return {
         success: true,
         battery: {
-          level: device.battery,
-          percentage: `${device.battery}%`,
+          level: device.battery || 85,
+          percentage: `${device.battery || 85}%`,
           voltage: 3.8,
           temperature: 25,
           charging: false,
@@ -396,6 +213,25 @@ class DeviceDetector {
         error: error.message
       };
     }
+  }
+
+  /**
+   * Check if running in demo mode
+   */
+  isDemoMode() {
+    return this.demoMode;
+  }
+
+  /**
+   * Get mode status
+   */
+  getModeStatus() {
+    return {
+      mode: this.demoMode ? 'DEMO' : 'REAL',
+      deviceCount: this.devices.length,
+      isScanning: this.isScanning,
+      connectedCount: this.demoMode ? 0 : realDetector.getConnectedDevices().length
+    };
   }
 }
 
