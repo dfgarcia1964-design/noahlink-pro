@@ -16,6 +16,32 @@ class RealBluetoothDetector {
   }
 
   /**
+   * Get device name from Windows registry
+   */
+  async getDeviceName(macAddress) {
+    try {
+      // Get device name from registry and decode from bytes
+      const path = `HKLM:\\\\SYSTEM\\\\CurrentControlSet\\\\Services\\\\BTHPORT\\\\Parameters\\\\Devices\\\\${macAddress}`;
+      const powershellCommand = `$props = Get-ItemProperty "${path}" -Name "Name" -ErrorAction SilentlyContinue; if ($props.Name) { $nameBytes = $props.Name; if ($nameBytes -is [byte[]]) { [System.Text.Encoding]::UTF8.GetString($nameBytes).TrimEnd([char]0) } else { $nameBytes } }`;
+
+      const { stdout } = await execPromise(
+        `powershell -Command "${powershellCommand}"`,
+        { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 }
+      );
+
+      if (stdout && stdout.trim()) {
+        const decodedName = stdout.trim();
+        if (decodedName && decodedName.length > 0) {
+          return decodedName;
+        }
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
    * Get paired Bluetooth devices from Windows using simplified PowerShell
    */
   async getWindowsBluetoothDevices() {
@@ -45,18 +71,27 @@ class RealBluetoothDetector {
         return [];
       }
 
-      // Filter for Phonak devices if we can, otherwise return all
       logger.success(`✅ Found ${deviceIds.length} Bluetooth device(s)`);
 
-      return deviceIds.map((id, index) => ({
-        id: `phonak-${index}`,
-        name: `Phonak Device ${index + 1}`,
-        type: 'Bluetooth',
-        description: 'Phonak Hearing Aid',
-        available: true,
-        macAddress: id,
-        source: 'Registry'
-      }));
+      // Get device names for each MAC address
+      const devices = [];
+      for (let i = 0; i < deviceIds.length; i++) {
+        const macAddress = deviceIds[i];
+        const deviceName = await this.getDeviceName(macAddress);
+
+        devices.push({
+          id: `phonak-${i}`,
+          name: deviceName || `Phonak Device ${i + 1}`,
+          type: 'Bluetooth',
+          description: 'Phonak Hearing Aid',
+          available: true,
+          macAddress: macAddress,
+          source: 'Registry',
+          index: i + 1
+        });
+      }
+
+      return devices;
     } catch (error) {
       logger.error('Error scanning Bluetooth devices', error.message);
       return [];
