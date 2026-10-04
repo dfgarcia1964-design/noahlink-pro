@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import DeviceCard from './DeviceCard';
 import RealtimeMonitor from './RealtimeMonitor';
-import BatteryChart from './BatteryChart';
-import EventLog from './EventLog';
-import ProgramManager from './ProgramManager';
+import BatteryChartDemo from './BatteryChartDemo';
+import EventLogDemo from './EventLogDemo';
+import ProgramManagerDemo from './ProgramManagerDemo';
 
 const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user-001' }) => {
   const [selectedDevice, setSelectedDevice] = useState(null);
@@ -155,16 +155,16 @@ const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user
 
                 <div>
                   {activeTab === 'monitor' && (
-                    <RealtimeMonitor deviceId={currentDevice.id} userId={userId} />
+                    <RealtimeMonitor device={currentDevice} userId={userId} />
                   )}
                   {activeTab === 'battery' && (
-                    <BatteryChart deviceId={currentDevice.id} />
+                    <BatteryChartDemo device={currentDevice} />
                   )}
                   {activeTab === 'events' && (
-                    <EventLog deviceId={currentDevice.id} userId={userId} />
+                    <EventLogDemo device={currentDevice} />
                   )}
                   {activeTab === 'programs' && (
-                    <ProgramManager deviceId={currentDevice.id} userId={userId} />
+                    <ProgramManagerDemo device={currentDevice} />
                   )}
                 </div>
               </div>

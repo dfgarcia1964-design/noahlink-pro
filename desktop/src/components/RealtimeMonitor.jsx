@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
-import useDeviceStatus from '../hooks/useDeviceStatus';
+import React, { useState, useEffect } from 'react';
 
 /**
  * RealtimeMonitor - Monitor en vivo del dispositivo
  * Muestra batería, volumen, programa, señal en tiempo real
  */
-const RealtimeMonitor = ({ deviceId, userId = 'user-001' }) => {
-  const { device, loading, connected, updateVolume, updateProgram } = useDeviceStatus(deviceId, userId);
-  const [newVolume, setNewVolume] = useState(device?.volume || 0);
+const RealtimeMonitor = ({ device, userId = 'user-001' }) => {
+  const [volume, setVolume] = useState(75);
+  const [feedback, setFeedback] = useState('');
 
-  if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Cargando...</div>;
-  }
+  useEffect(() => {
+    if (device) {
+      setVolume(device.volume || 75);
+    }
+  }, [device?.id]);
 
   if (!device) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Dispositivo no disponible</div>;
+    return <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>Selecciona un dispositivo</div>;
   }
 
   const handleVolumeChange = (e) => {
-    const vol = parseInt(e.target.value);
-    setNewVolume(vol);
-    updateVolume(vol);
+    const newVol = parseInt(e.target.value);
+    setVolume(newVol);
+    setFeedback('✓ Volumen actualizado');
+    setTimeout(() => setFeedback(''), 1000);
   };
 
   const getBatteryClass = (level) => {
@@ -62,17 +64,37 @@ const RealtimeMonitor = ({ deviceId, userId = 'user-001' }) => {
       {/* Grid de 2 columnas - Volumen y Programa */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
         {/* Volumen */}
-        <div style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: '500' }}>VOLUMEN</div>
-          <div style={{ fontSize: '28px', fontWeight: '700', color: '#2563eb', marginBottom: '12px' }}>{newVolume}%</div>
+        <div style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '8px', border: '2px solid #2563eb', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.1)' }}>
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: '500' }}>🔊 VOLUMEN</div>
+          <div style={{ fontSize: '36px', fontWeight: '700', color: '#2563eb', marginBottom: '12px', textAlign: 'center', transition: 'font-size 0.2s' }}>
+            {volume}%
+          </div>
+          <div style={{ height: '8px', backgroundColor: '#e5e7eb', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
+            <div style={{
+              height: '100%',
+              width: `${volume}%`,
+              backgroundColor: '#2563eb',
+              transition: 'width 0.1s ease',
+              borderRadius: '4px'
+            }} />
+          </div>
           <input
             type="range"
             min="0"
             max="100"
-            value={newVolume}
+            value={volume}
             onChange={handleVolumeChange}
-            style={{ width: '100%', cursor: 'pointer' }}
+            style={{
+              width: '100%',
+              cursor: 'pointer',
+              accentColor: '#2563eb',
+              height: '6px'
+            }}
           />
+          <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '8px', textAlign: 'center' }}>
+            {volume < 33 ? '🔇 Bajo' : volume < 66 ? '🔉 Medio' : '🔊 Alto'}
+            {feedback && <span style={{ marginLeft: '8px', color: '#22c55e', fontWeight: '600' }}>{feedback}</span>}
+          </div>
         </div>
 
         {/* Programa Actual */}
@@ -85,7 +107,7 @@ const RealtimeMonitor = ({ deviceId, userId = 'user-001' }) => {
 
       {/* Información adicional */}
       <div style={{ padding: '12px', backgroundColor: '#f0f9ff', borderRadius: '6px', fontSize: '12px', color: '#0369a1' }}>
-        {connected ? '✅ Conectado en tiempo real' : '❌ Desconectado - Datos en caché'}
+        {device?.connected ? '✅ Conectado en tiempo real' : '❌ Desconectado - Datos en caché'}
       </div>
     </div>
   );

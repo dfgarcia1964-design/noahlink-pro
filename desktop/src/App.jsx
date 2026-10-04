@@ -6,9 +6,12 @@
 import React from 'react';
 import './App.css';
 import Dashboard from './components/Dashboard';
+import useDemoData from './hooks/useDemoData';
 
 function App() {
-  return <Dashboard />;
+  const { devices } = useDemoData();
+
+  return <Dashboard devices={devices} />;
 }
 
 export default App;
