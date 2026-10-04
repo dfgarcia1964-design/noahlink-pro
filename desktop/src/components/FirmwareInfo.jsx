@@ -1,38 +1,60 @@
 import React, { useState } from 'react';
 
+// Global firmware state
+let globalFirmwareState = {
+  'device-1': {
+    current: '1.0.4.0',
+    latest: '1.0.5.2',
+    hardware: '2.1.0',
+    bootloader: '1.2.0',
+    buildDate: '2026-09-15',
+    serial: '2346X3WUN',
+    lastUpdated: '2026-08-20'
+  },
+  'device-2': {
+    current: '1.0.4.0',
+    latest: '1.0.5.2',
+    hardware: '2.1.0',
+    bootloader: '1.2.0',
+    buildDate: '2026-09-15',
+    serial: '2344X0TMU',
+    lastUpdated: '2026-08-20'
+  }
+};
+
 const FirmwareInfo = ({ device }) => {
   const [updating, setUpdating] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  // Mock firmware versions for demo
-  const firmwareData = {
-    'device-1': {
-      current: '1.0.4.0',
-      latest: '1.0.5.2',
-      hardware: '2.1.0',
-      bootloader: '1.2.0',
-      buildDate: '2026-09-15',
-      serial: '2346X3WUN',
-      lastUpdated: '2026-08-20'
-    },
-    'device-2': {
-      current: '1.0.4.0',
-      latest: '1.0.5.2',
-      hardware: '2.1.0',
-      bootloader: '1.2.0',
-      buildDate: '2026-09-15',
-      serial: '2344X0TMU',
-      lastUpdated: '2026-08-20'
-    }
-  };
-
-  const fw = firmwareData[device?.id] || firmwareData['device-1'];
+  const fw = globalFirmwareState[device?.id] || globalFirmwareState['device-1'];
   const hasUpdate = fw.current !== fw.latest;
 
   const handleUpdate = () => {
+    if (!hasUpdate) return;
+
+    // Confirmación
+    const confirmed = window.confirm(
+      `¿Actualizar firmware de ${fw.current} a ${fw.latest}?\n\nEsta operación puede tomar 5-10 minutos.`
+    );
+
+    if (!confirmed) return;
+
     setUpdating(true);
+
+    // Simular actualización
     setTimeout(() => {
+      // Actualizar versión actual
+      globalFirmwareState[device.id].current = globalFirmwareState[device.id].latest;
+      globalFirmwareState[device.id].lastUpdated = new Date().toISOString().split('T')[0];
+
       setUpdating(false);
-      alert('✅ Firmware actualizado correctamente a ' + fw.latest);
+      setUpdateSuccess(true);
+
+      // Mostrar éxito
+      alert(`✅ ¡Firmware actualizado exitosamente!\n\nAhora ejecutando v${fw.latest}\nDispositivo: ${device.name}`);
+
+      // Limpiar el mensaje después de 5 segundos
+      setTimeout(() => setUpdateSuccess(false), 5000);
     }, 3000);
   };
 
@@ -40,24 +62,30 @@ const FirmwareInfo = ({ device }) => {
     <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>📦 Información de Firmware</h2>
-        {hasUpdate && (
-          <button
-            onClick={handleUpdate}
-            disabled={updating}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: updating ? '#9ca3af' : '#22c55e',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: updating ? 'not-allowed' : 'pointer',
-              fontWeight: '600',
-              fontSize: '14px'
-            }}
-          >
-            {updating ? '⏳ Actualizando...' : '⬆️ Actualizar'}
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {updateSuccess && (
+            <span style={{ color: '#22c55e', fontWeight: '600', fontSize: '14px' }}>✅ ¡Actualizado!</span>
+          )}
+          {hasUpdate && (
+            <button
+              onClick={handleUpdate}
+              disabled={updating}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: updating ? '#9ca3af' : '#f59e0b',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: updating ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                fontSize: '14px',
+                transition: 'all 0.2s'
+              }}
+            >
+              {updating ? '⏳ Actualizando...' : '⬆️ Actualizar Ahora'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Versiones */}
