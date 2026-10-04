@@ -6,8 +6,14 @@ let globalDeviceState = {
   'device-2': { volume: 75, program: 'Conversation', battery: 99 }
 };
 
+// Historial global de eventos
+let globalEvents = [
+  { id: 1, timestamp: new Date(Date.now() - 5 * 60000), type: 'CONNECTED', description: 'Dispositivo conectado', icon: '✅', deviceId: 'device-1' }
+];
+
 const useDemoData = () => {
   const [devices, setDevices] = useState([]);
+  const [events, setEvents] = useState(globalEvents);
 
   useEffect(() => {
     // Datos de demostración de los 2 audífonos detectados
@@ -61,6 +67,18 @@ const useDemoData = () => {
     setDevices(prev => prev.map(device =>
       device.id === deviceId ? { ...device, volume } : device
     ));
+
+    // Agregar evento
+    const newEvent = {
+      id: globalEvents.length + 1,
+      timestamp: new Date(),
+      type: 'VOLUME_CHANGE',
+      description: `Volumen ajustado a ${volume}%`,
+      icon: '🔊',
+      deviceId
+    };
+    globalEvents.unshift(newEvent);
+    setEvents([...globalEvents]);
   };
 
   // Función para actualizar programa
@@ -69,9 +87,26 @@ const useDemoData = () => {
     setDevices(prev => prev.map(device =>
       device.id === deviceId ? { ...device, currentProgram: program } : device
     ));
+
+    // Agregar evento
+    const newEvent = {
+      id: globalEvents.length + 1,
+      timestamp: new Date(),
+      type: 'PROGRAM_CHANGE',
+      description: `Programa cambió a ${program}`,
+      icon: '🎵',
+      deviceId
+    };
+    globalEvents.unshift(newEvent);
+    setEvents([...globalEvents]);
   };
 
-  return { devices, updateVolume, updateProgram };
+  // Función para obtener eventos de un dispositivo
+  const getDeviceEvents = (deviceId) => {
+    return globalEvents.filter(e => e.deviceId === deviceId);
+  };
+
+  return { devices, updateVolume, updateProgram, events, getDeviceEvents };
 };
 
 export default useDemoData;

@@ -5,7 +5,7 @@ import BatteryChartDemo from './BatteryChartDemo';
 import EventLogDemo from './EventLogDemo';
 import ProgramManagerDemo from './ProgramManagerDemo';
 
-const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user-001', onUpdateVolume, onUpdateProgram }) => {
+const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user-001', onUpdateVolume, onUpdateProgram, getDeviceEvents }) => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [activeTab, setActiveTab] = useState('monitor');
   const [darkMode, setDarkMode] = useState(false);
@@ -161,7 +161,7 @@ const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user
                     <BatteryChartDemo device={currentDevice} />
                   )}
                   {activeTab === 'events' && (
-                    <EventLogDemo device={currentDevice} />
+                    <EventLogDemo device={currentDevice} getDeviceEvents={getDeviceEvents} />
                   )}
                   {activeTab === 'programs' && (
                     <ProgramManagerDemo device={currentDevice} onUpdateProgram={onUpdateProgram} />

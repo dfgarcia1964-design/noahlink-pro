@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-const EventLogDemo = ({ device }) => {
+const EventLogDemo = ({ device, getDeviceEvents }) => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    // Simular eventos
-    const demoEvents = [
-      { id: 1, timestamp: new Date(Date.now() - 5 * 60000), type: 'VOLUME_CHANGE', description: 'Volumen ajustado a 75%', icon: '🔊' },
-      { id: 2, timestamp: new Date(Date.now() - 15 * 60000), type: 'PROGRAM_CHANGE', description: 'Programa cambió a Conversación', icon: '🎵' },
-      { id: 3, timestamp: new Date(Date.now() - 30 * 60000), type: 'BATTERY_ALERT', description: 'Batería baja - 20%', icon: '⚠️' },
-      { id: 4, timestamp: new Date(Date.now() - 1 * 60 * 60000), type: 'CONNECTED', description: 'Dispositivo conectado', icon: '✅' },
-      { id: 5, timestamp: new Date(Date.now() - 2 * 60 * 60000), type: 'SYNC', description: 'Sincronización completada', icon: '🔄' },
-    ];
-    setEvents(demoEvents);
-  }, [device?.id]);
+    if (device && getDeviceEvents) {
+      const deviceEvents = getDeviceEvents(device.id);
+      setEvents(deviceEvents);
+    }
+  }, [device?.id, getDeviceEvents]);
 
   return (
     <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
