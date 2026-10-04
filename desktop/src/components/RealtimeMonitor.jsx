@@ -22,7 +22,7 @@ const RealtimeMonitor = ({ device, userId = 'user-001', onUpdateVolume }) => {
     const newVol = parseInt(e.target.value);
     setVolume(newVol);
     if (device && onUpdateVolume) {
-      onUpdateVolume(device.id, newVol);
+      onUpdateVolume(device.deviceId || device.id, newVol);
     }
     setFeedback('✓ Volumen actualizado');
     setTimeout(() => setFeedback(''), 1000);
