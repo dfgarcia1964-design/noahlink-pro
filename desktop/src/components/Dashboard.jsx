@@ -4,6 +4,7 @@ import RealtimeMonitor from './RealtimeMonitor';
 import BatteryChartDemo from './BatteryChartDemo';
 import EventLogDemo from './EventLogDemo';
 import ProgramManagerDemo from './ProgramManagerDemo';
+import FirmwareInfo from './FirmwareInfo';
 
 const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user-001', onUpdateVolume, onUpdateProgram, getDeviceEvents }) => {
   const [selectedDevice, setSelectedDevice] = useState(null);
@@ -22,7 +23,8 @@ const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user
     { id: 'monitor', label: 'Monitor en Vivo', icon: '📊' },
     { id: 'battery', label: 'Batería', icon: '🔋' },
     { id: 'events', label: 'Eventos', icon: '📝' },
-    { id: 'programs', label: 'Programas', icon: '🎵' }
+    { id: 'programs', label: 'Programas', icon: '🎵' },
+    { id: 'firmware', label: 'Firmware', icon: '📦' }
   ];
 
   const bgColor = darkMode ? '#1f2937' : '#f3f4f6';
@@ -165,6 +167,9 @@ const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user
                   )}
                   {activeTab === 'programs' && (
                     <ProgramManagerDemo device={currentDevice} onUpdateProgram={onUpdateProgram} />
+                  )}
+                  {activeTab === 'firmware' && (
+                    <FirmwareInfo device={currentDevice} />
                   )}
                 </div>
               </div>
