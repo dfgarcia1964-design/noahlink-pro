@@ -18,8 +18,8 @@ router.get('/bluetooth', async (req, res) => {
   try {
     logger.info('📡 Checking Bluetooth connections...');
 
-    // Get all connected Bluetooth devices
-    const powershellCommand = `@(Get-WmiObject -Namespace "root\\cimv2" -Class "Win32_PnPDevice" | Where-Object { $_.ClassGuid -eq '{e0cbf06c-cd8b-4647-bb8b-7f5760e440d9}' } | Select-Object Name, Status, Description) | ConvertTo-Json`;
+    // Get all Bluetooth devices using Get-PnpDevice (more reliable than WMI)
+    const powershellCommand = `@(Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | Select-Object FriendlyName, Status) | ConvertTo-Json`;
 
     const { stdout } = await execPromise(
       `powershell -Command "${powershellCommand}"`,
@@ -30,15 +30,20 @@ router.get('/bluetooth', async (req, res) => {
     if (stdout && stdout.trim() && stdout.trim() !== '[]') {
       try {
         const parsed = JSON.parse(stdout);
-        devices = Array.isArray(parsed) ? parsed : [parsed];
+        devices = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
+        // Rename FriendlyName to Name for consistency
+        devices = devices.map(d => ({
+          Name: d.FriendlyName,
+          Status: d.Status
+        }));
       } catch (e) {
-        logger.warn('Could not parse Bluetooth devices');
+        logger.warn('Could not parse Bluetooth devices:', e.message);
       }
     }
 
     // Check for Phonak devices specifically
     const phonakDevices = devices.filter(d =>
-      d.Name && (d.Name.includes('Phonak') || d.Name.includes('LE_D'))
+      d.Name && (d.Name.includes('Phonak') || d.Name.includes('LE_D') || d.Name.includes('D-Phonak'))
     );
 
     res.json({
