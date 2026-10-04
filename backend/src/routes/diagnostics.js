@@ -19,7 +19,7 @@ router.get('/bluetooth', async (req, res) => {
     logger.info('📡 Checking Bluetooth connections...');
 
     // Get all connected Bluetooth devices
-    const powershellCommand = `Get-WmiObject -Namespace "root\\cimv2" -Class "Win32_PnPDevice" | Where-Object { $_.ClassGuid -eq '{e0cbf06c-cd8b-4647-bb8b-7f5760e440d9}' } | Select-Object Name, Status, Description | ConvertTo-Json -AsArray`;
+    const powershellCommand = `@(Get-WmiObject -Namespace "root\\cimv2" -Class "Win32_PnPDevice" | Where-Object { $_.ClassGuid -eq '{e0cbf06c-cd8b-4647-bb8b-7f5760e440d9}' } | Select-Object Name, Status, Description) | ConvertTo-Json`;
 
     const { stdout } = await execPromise(
       `powershell -Command "${powershellCommand}"`,
