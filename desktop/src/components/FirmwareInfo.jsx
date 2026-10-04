@@ -25,8 +25,14 @@ let globalFirmwareState = {
 const FirmwareInfo = ({ device }) => {
   const [updating, setUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [firmware, setFirmware] = useState(null);
 
-  const fw = globalFirmwareState[device?.id] || globalFirmwareState['device-1'];
+  React.useEffect(() => {
+    const fw = globalFirmwareState[device?.id] || globalFirmwareState['device-1'];
+    setFirmware(fw);
+  }, [device?.id]);
+
+  const fw = firmware || (globalFirmwareState[device?.id] || globalFirmwareState['device-1']);
   const hasUpdate = fw.current !== fw.latest;
 
   const handleUpdate = () => {
@@ -37,17 +43,19 @@ const FirmwareInfo = ({ device }) => {
     // Simular actualización (3 segundos)
     setTimeout(() => {
       // Actualizar versión actual
-      globalFirmwareState[device.id].current = globalFirmwareState[device.id].latest;
-      globalFirmwareState[device.id].lastUpdated = new Date().toISOString().split('T')[0];
+      const updatedFw = {
+        ...globalFirmwareState[device.id],
+        current: globalFirmwareState[device.id].latest,
+        lastUpdated: new Date().toISOString().split('T')[0]
+      };
+      globalFirmwareState[device.id] = updatedFw;
+      setFirmware(updatedFw);
 
       setUpdating(false);
       setUpdateSuccess(true);
 
       // Limpiar el mensaje después de 5 segundos
       setTimeout(() => setUpdateSuccess(false), 5000);
-
-      // Recargar para mostrar cambios
-      setTimeout(() => window.location.reload(), 1000);
     }, 3000);
   };
 
