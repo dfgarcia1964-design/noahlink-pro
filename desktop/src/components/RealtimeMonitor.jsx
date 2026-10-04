@@ -58,7 +58,7 @@ const RealtimeMonitor = ({ device, userId = 'user-001', onUpdateVolume }) => {
               />
             </div>
             <div style={{ fontSize: '12px', color: '#6b7280' }}>
-              Estado: {getBatteryClass(device.battery)} | Última sync: {new Date(device.lastSync).toLocaleTimeString('es-ES')}
+              Estado: {getBatteryClass(device.battery)} | Última sync: {device.lastUpdate ? new Date(device.lastUpdate).toLocaleTimeString('es-ES') : 'N/A'}
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ const RealtimeMonitor = ({ device, userId = 'user-001', onUpdateVolume }) => {
         {/* Programa Actual */}
         <div style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: '500' }}>🎵 PROGRAMA ACTUAL</div>
-          <div style={{ fontSize: '24px', fontWeight: '700', color: '#2563eb' }}>{device.currentProgram}</div>
+          <div style={{ fontSize: '24px', fontWeight: '700', color: '#2563eb' }}>{device.program || 'N/A'}</div>
           <div style={{ fontSize: '12px', color: '#22c55e', marginTop: '8px', fontWeight: '600' }}>✓ Activo</div>
         </div>
       </div>
