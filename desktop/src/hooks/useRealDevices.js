@@ -12,12 +12,13 @@ const useRealDevices = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mode, setMode] = useState('LOADING');
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Fetch devices from backend
+  // Fetch devices from backend (Phase 2: Real device states with battery, volume, program)
   const fetchDevices = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/v1/devices`);
+      const response = await fetch(`${API_URL}/api/devices/states`);
       if (!response.ok) throw new Error('Failed to fetch devices');
       const data = await response.json();
 
@@ -52,6 +53,13 @@ const useRealDevices = () => {
     // Fetch initial devices
     fetchDevices();
     checkMode();
+
+    // Set up auto-refresh every 5 seconds
+    const refreshInterval = setInterval(() => {
+      if (autoRefresh) {
+        fetchDevices();
+      }
+    }, 5000);
 
     // Connect to WebSocket
     if (!globalSocket) {
@@ -97,11 +105,11 @@ const useRealDevices = () => {
     }
 
     return () => {
-      // Don't disconnect on unmount - keep connection alive
+      clearInterval(refreshInterval);
     };
-  }, []);
+  }, [autoRefresh]);
 
-  // Update volume
+  // Update volume (Phase 2: Real device control)
   const updateVolume = async (deviceId, volume) => {
     try {
       const response = await fetch(`${API_URL}/api/device/${deviceId}/volume`, {
@@ -114,12 +122,14 @@ const useRealDevices = () => {
 
       const result = await response.json();
 
-      // Update local state
-      const updated = globalDevices.map(d =>
-        d.id === deviceId ? { ...d, volume } : d
-      );
-      globalDevices = updated;
-      setDevices([...updated]);
+      // Update local state with response
+      if (result.device) {
+        const updated = globalDevices.map(d =>
+          d.id === deviceId ? result.device : d
+        );
+        globalDevices = updated;
+        setDevices([...updated]);
+      }
 
       // Emit event via WebSocket
       if (globalSocket) {
@@ -133,7 +143,7 @@ const useRealDevices = () => {
     }
   };
 
-  // Update program
+  // Update program (Phase 2: Real device control)
   const updateProgram = async (deviceId, program) => {
     try {
       const response = await fetch(`${API_URL}/api/device/${deviceId}/program`, {
@@ -146,12 +156,14 @@ const useRealDevices = () => {
 
       const result = await response.json();
 
-      // Update local state
-      const updated = globalDevices.map(d =>
-        d.id === deviceId ? { ...d, program } : d
-      );
-      globalDevices = updated;
-      setDevices([...updated]);
+      // Update local state with response
+      if (result.device) {
+        const updated = globalDevices.map(d =>
+          d.id === deviceId ? result.device : d
+        );
+        globalDevices = updated;
+        setDevices([...updated]);
+      }
 
       // Emit event via WebSocket
       if (globalSocket) {
@@ -183,6 +195,8 @@ const useRealDevices = () => {
     loading,
     error,
     mode,
+    autoRefresh,
+    setAutoRefresh,
     updateVolume,
     updateProgram,
     getDeviceEvents,
