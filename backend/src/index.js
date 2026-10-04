@@ -36,11 +36,13 @@ global.wsManager = wsManager;
 // Import routes
 const authRoutes = require('./routes/auth-mock'); // Using mock auth while MongoDB is unavailable
 const phase3Routes = require('./routes/phase3-mongodb');
+const phase2ControlRoutes = require('./routes/phase2-control'); // Phase 2: Real device control
 const batteryRoutes = require('./routes/battery'); // Phase 2: Battery history
 const eventsRoutes = require('./routes/events'); // Phase 2: Event logging
 const websocketRoutes = require('./routes/websocket'); // Phase 2: WebSocket management
 const { verifyToken } = require('./middleware/auth');
 const deviceDetector = require('./services/device-detector');
+const phonakService = require('./services/phonak-service'); // Phase 2: Phonak control
 const volumeManager = require('./services/volume-manager');
 const batteryManager = require('./services/battery-manager');
 const analyticsService = require('./services/analytics');
@@ -666,6 +668,9 @@ app.use('/api/v1/websocket', websocketRoutes);
 app.use('/api/v1/devices/:deviceId/battery', batteryRoutes);
 app.use('/api/v1/devices/:deviceId/events', eventsRoutes);
 
+// ==================== PHASE 2: DEVICE CONTROL ROUTES ====================
+app.use('/api', phase2ControlRoutes);
+
 // ==================== PROTECTED ROUTES ====================
 app.use('/api/v1', verifyToken, phase3Routes);
 
@@ -693,6 +698,13 @@ server.listen(PORT, async () => {
 
   // Initialize device detection
   const devices = await initializeDevices();
+
+  // Initialize Phonak service (Phase 2)
+  try {
+    await phonakService.initialize();
+  } catch (error) {
+    logger.warn('Phonak service initialization failed:', error.message);
+  }
 
   logger.success(`
 ╔════════════════════════════════════════════════════════╗
