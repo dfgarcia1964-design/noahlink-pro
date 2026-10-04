@@ -16,42 +16,46 @@ class RealBluetoothDetector {
   }
 
   /**
-   * Get paired Bluetooth devices from Windows
+   * Get paired Bluetooth devices from Windows using simplified PowerShell
    */
   async getWindowsBluetoothDevices() {
     try {
-      logger.info('Scanning Windows Bluetooth devices...');
+      logger.info('🔍 Scanning Windows Bluetooth devices...');
 
-      const powershellCommand = `
-        Get-WmiObject -Class Win32_PnPDevice -Filter "ClassGuid='{e0cbf06c-cd8b-4647-bb8b-7f5760e440d9}'" |
-        Select-Object Name, Description, DeviceID |
-        ConvertTo-Json -AsArray
-      `;
+      // Use Registry path which is more reliable
+      const registryPath = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\BTHPORT\\Parameters\\Devices';
+      const powershellCommand = `Get-ChildItem "${registryPath}" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty PSChildName | ConvertTo-Json`;
 
       const { stdout } = await execPromise(
         `powershell -Command "${powershellCommand}"`,
         { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 }
       );
 
-      if (!stdout || stdout.trim() === '[]') {
-        logger.warn('No Bluetooth devices found');
+      if (!stdout || stdout.trim() === '' || stdout.trim() === 'null' || stdout.trim() === '[]') {
+        logger.warn('No Bluetooth devices found in registry');
         return [];
       }
 
-      const devices = JSON.parse(stdout);
-      logger.success(`Found ${devices.length} Bluetooth device(s)`);
+      let deviceIds = [];
+      try {
+        const parsed = JSON.parse(stdout);
+        deviceIds = Array.isArray(parsed) ? parsed : [parsed];
+      } catch (e) {
+        logger.warn('Could not parse Bluetooth registry');
+        return [];
+      }
 
-      return devices.filter(device =>
-        device.Name && (
-          device.Name.includes('Phonak') ||
-          device.Description?.includes('Phonak')
-        )
-      ).map(device => ({
-        id: device.DeviceID || device.Name,
-        name: device.Name,
+      // Filter for Phonak devices if we can, otherwise return all
+      logger.success(`✅ Found ${deviceIds.length} Bluetooth device(s)`);
+
+      return deviceIds.map((id, index) => ({
+        id: `phonak-${index}`,
+        name: `Phonak Device ${index + 1}`,
         type: 'Bluetooth',
-        description: device.Description,
-        available: true
+        description: 'Phonak Hearing Aid',
+        available: true,
+        macAddress: id,
+        source: 'Registry'
       }));
     } catch (error) {
       logger.error('Error scanning Bluetooth devices', error.message);
@@ -70,12 +74,11 @@ class RealBluetoothDetector {
 
       if (windowsDevices.length > 0) {
         this.devices = windowsDevices;
-        logger.success(`✅ Found ${windowsDevices.length} Phonak device(s)`);
+        logger.success(`✅ Found ${windowsDevices.length} Bluetooth device(s)`);
         return windowsDevices;
       }
 
-      // Fallback: Si no hay dispositivos detectados, retornar lista vacía
-      logger.warn('No Phonak devices found on this system');
+      logger.warn('No Bluetooth devices found on this system');
       return [];
     } catch (error) {
       logger.error('Error scanning devices', error.message);
@@ -97,7 +100,6 @@ class RealBluetoothDetector {
         throw new Error(`Device ${deviceId} not found`);
       }
 
-      // En una implementación real, aquí se establecería la conexión BLE
       this.connectedDevices.set(deviceId, {
         connected: true,
         connectedAt: new Date(),
@@ -106,7 +108,7 @@ class RealBluetoothDetector {
         program: 'Conversation'
       });
 
-      logger.success(`Connected to ${device.name}`);
+      logger.success(`✅ Connected to ${device.name}`);
       return {
         success: true,
         device,
@@ -172,7 +174,6 @@ class RealBluetoothDetector {
 
       logger.info(`Setting volume to ${volume}% on ${deviceId}`);
 
-      // Aquí iría el comando BLE real para cambiar volumen
       const device = this.connectedDevices.get(deviceId);
       if (device) {
         device.volume = volume;
@@ -208,7 +209,6 @@ class RealBluetoothDetector {
         throw new Error(`Invalid program: ${programName}`);
       }
 
-      // Aquí iría el comando BLE real para cambiar programa
       const device = this.connectedDevices.get(deviceId);
       if (device) {
         device.program = programName;

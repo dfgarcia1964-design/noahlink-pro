@@ -6,7 +6,7 @@ import EventLogDemo from './EventLogDemo';
 import ProgramManagerDemo from './ProgramManagerDemo';
 import FirmwareInfo from './FirmwareInfo';
 
-const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user-001', onUpdateVolume, onUpdateProgram, getDeviceEvents }) => {
+const Dashboard = ({ devices = [], loading = false, error = null, mode = 'LOADING', userId = 'user-001', onUpdateVolume, onUpdateProgram, getDeviceEvents }) => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [activeTab, setActiveTab] = useState('monitor');
   const [darkMode, setDarkMode] = useState(false);
@@ -64,20 +64,34 @@ const Dashboard = ({ devices = [], loading = false, error = null, userId = 'user
                 Control en tiempo real de tus dispositivos Phonak
               </p>
             </div>
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                border: 'none',
-                borderRadius: '4px',
-                color: '#ffffff',
-                cursor: 'pointer',
-                fontWeight: '600'
-              }}
-            >
-              {darkMode ? '☀️ Claro' : '🌙 Oscuro'}
-            </button>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {mode && (
+                <div style={{
+                  padding: '6px 12px',
+                  backgroundColor: mode === 'REAL' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  border: `1px solid ${mode === 'REAL' ? '#22c55e' : '#ef4444'}`
+                }}>
+                  {mode === 'REAL' ? '🟢 REAL MODE' : mode === 'LOADING' ? '⏳ Conectando...' : '🟡 DEMO MODE'}
+                </div>
+              )}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                {darkMode ? '☀️ Claro' : '🌙 Oscuro'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
