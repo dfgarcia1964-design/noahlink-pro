@@ -9,9 +9,9 @@ import Dashboard from './components/Dashboard';
 import useDemoData from './hooks/useDemoData';
 
 function App() {
-  const { devices } = useDemoData();
+  const { devices, updateVolume, updateProgram } = useDemoData();
 
-  return <Dashboard devices={devices} />;
+  return <Dashboard devices={devices} onUpdateVolume={updateVolume} onUpdateProgram={updateProgram} />;
 }
 
 export default App;

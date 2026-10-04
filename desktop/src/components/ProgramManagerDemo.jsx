@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const ProgramManagerDemo = ({ device }) => {
+const ProgramManagerDemo = ({ device, onUpdateProgram }) => {
   const [currentProgram, setCurrentProgram] = useState(device?.currentProgram || 'Conversation');
   const [feedback, setFeedback] = useState('');
 
@@ -15,6 +15,9 @@ const ProgramManagerDemo = ({ device }) => {
 
   const handleProgramChange = (programName) => {
     setCurrentProgram(programName);
+    if (device && onUpdateProgram) {
+      onUpdateProgram(device.id, programName);
+    }
     setFeedback(`✓ Programa cambiado a ${programName}`);
     setTimeout(() => setFeedback(''), 2000);
   };

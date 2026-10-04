@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
  * RealtimeMonitor - Monitor en vivo del dispositivo
  * Muestra batería, volumen, programa, señal en tiempo real
  */
-const RealtimeMonitor = ({ device, userId = 'user-001' }) => {
+const RealtimeMonitor = ({ device, userId = 'user-001', onUpdateVolume }) => {
   const [volume, setVolume] = useState(75);
   const [feedback, setFeedback] = useState('');
 
@@ -21,6 +21,9 @@ const RealtimeMonitor = ({ device, userId = 'user-001' }) => {
   const handleVolumeChange = (e) => {
     const newVol = parseInt(e.target.value);
     setVolume(newVol);
+    if (device && onUpdateVolume) {
+      onUpdateVolume(device.id, newVol);
+    }
     setFeedback('✓ Volumen actualizado');
     setTimeout(() => setFeedback(''), 1000);
   };
@@ -99,9 +102,9 @@ const RealtimeMonitor = ({ device, userId = 'user-001' }) => {
 
         {/* Programa Actual */}
         <div style={{ padding: '16px', backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: '500' }}>PROGRAMA ACTUAL</div>
-          <div style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>{device.currentProgram}</div>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>Activo</div>
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: '500' }}>🎵 PROGRAMA ACTUAL</div>
+          <div style={{ fontSize: '24px', fontWeight: '700', color: '#2563eb' }}>{device.currentProgram}</div>
+          <div style={{ fontSize: '12px', color: '#22c55e', marginTop: '8px', fontWeight: '600' }}>✓ Activo</div>
         </div>
       </div>
 
