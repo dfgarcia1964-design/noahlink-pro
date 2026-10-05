@@ -148,13 +148,16 @@ router.get('/system', async (req, res) => {
       bluetoothService = { error: 'Could not check Bluetooth service' };
     }
 
+    // Check if service is running (Status can be "Running" or number 4)
+    const isRunning = bluetoothService.Status === 'Running' || bluetoothService.Status === 4;
+
     res.json({
       success: true,
       timestamp: new Date(),
       bluetoothService: bluetoothService,
       diagnostics: {
-        bluetoothServiceRunning: bluetoothService.Status === 'Running',
-        systemReady: bluetoothService.Status === 'Running'
+        bluetoothServiceRunning: isRunning,
+        systemReady: isRunning
       }
     });
   } catch (error) {
