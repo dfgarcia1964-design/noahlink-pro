@@ -33,6 +33,36 @@ wsManager.initializeServer();
 // Make wsManager available globally
 global.wsManager = wsManager;
 
+// Phase 2: Setup BLE Manager event listeners
+bleManager.on('device-discovered', (device) => {
+  logger.info(`📱 BLE Dispositivo descubierto: ${device.name}`);
+  wsManager.broadcastEvent('ble-device-discovered', device);
+});
+
+bleManager.on('device-connected', (device) => {
+  logger.info(`🔌 BLE Dispositivo conectado: ${device.name}`);
+  wsManager.broadcastEvent('ble-device-connected', device);
+});
+
+bleManager.on('device-disconnected', (device) => {
+  logger.info(`❌ BLE Dispositivo desconectado: ${device.name}`);
+  wsManager.broadcastEvent('ble-device-disconnected', device);
+});
+
+bleManager.on('volume-changed', (data) => {
+  logger.info(`🔊 Volumen cambiado: ${data.volume}%`);
+  wsManager.broadcastEvent('ble-volume-changed', data);
+});
+
+bleManager.on('program-changed', (data) => {
+  logger.info(`📻 Programa cambiado: ${data.program}`);
+  wsManager.broadcastEvent('ble-program-changed', data);
+});
+
+bleManager.on('battery-updated', (data) => {
+  wsManager.broadcastEvent('ble-battery-updated', data);
+});
+
 // Import routes
 const authRoutes = require('./routes/auth-mock'); // Using mock auth while MongoDB is unavailable
 const phase3Routes = require('./routes/phase3-mongodb');
@@ -42,6 +72,8 @@ const batteryRoutes = require('./routes/battery'); // Phase 2: Battery history
 const eventsRoutes = require('./routes/events'); // Phase 2: Event logging
 const websocketRoutes = require('./routes/websocket'); // Phase 2: WebSocket management
 const bleAdvancedRoutes = require('./routes/ble-advanced'); // Advanced BLE control
+const bleControlRoutes = require('./routes/ble-control'); // Phase 2: Real BLE control
+const bleManager = require('./bluetooth/ble-manager'); // Phase 2: BLE Manager
 const { verifyToken } = require('./middleware/auth');
 const deviceDetector = require('./services/device-detector');
 const phonakService = require('./services/phonak-service'); // Phase 2: Phonak control
@@ -678,6 +710,9 @@ app.use('/api/diagnostics', diagnosticsRoutes);
 
 // ==================== ADVANCED BLE ROUTES ====================
 app.use('/api/ble', bleAdvancedRoutes);
+
+// ==================== PHASE 2: BLE CONTROL ROUTES ====================
+app.use('/api/ble-control', bleControlRoutes);
 
 // ==================== PROTECTED ROUTES ====================
 app.use('/api/v1', verifyToken, phase3Routes);
