@@ -41,6 +41,7 @@ const diagnosticsRoutes = require('./routes/diagnostics'); // Diagnostics: Bluet
 const batteryRoutes = require('./routes/battery'); // Phase 2: Battery history
 const eventsRoutes = require('./routes/events'); // Phase 2: Event logging
 const websocketRoutes = require('./routes/websocket'); // Phase 2: WebSocket management
+const bleAdvancedRoutes = require('./routes/ble-advanced'); // Advanced BLE control
 const { verifyToken } = require('./middleware/auth');
 const deviceDetector = require('./services/device-detector');
 const phonakService = require('./services/phonak-service'); // Phase 2: Phonak control
@@ -674,6 +675,9 @@ app.use('/api', phase2ControlRoutes);
 
 // ==================== DIAGNOSTICS ROUTES ====================
 app.use('/api/diagnostics', diagnosticsRoutes);
+
+// ==================== ADVANCED BLE ROUTES ====================
+app.use('/api/ble', bleAdvancedRoutes);
 
 // ==================== PROTECTED ROUTES ====================
 app.use('/api/v1', verifyToken, phase3Routes);
