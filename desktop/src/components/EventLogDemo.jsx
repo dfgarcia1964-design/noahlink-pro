@@ -5,10 +5,15 @@ const EventLogDemo = ({ device, getDeviceEvents }) => {
 
   useEffect(() => {
     if (device && getDeviceEvents) {
-      const deviceEvents = getDeviceEvents(device.id);
-      setEvents(deviceEvents);
+      getDeviceEvents(device.deviceId || device.id)
+        .then((deviceEvents) => {
+          setEvents(Array.isArray(deviceEvents) ? deviceEvents : []);
+        })
+        .catch(() => {
+          setEvents([]);
+        });
     }
-  }, [device?.id, getDeviceEvents]);
+  }, [device?.deviceId, device?.id, getDeviceEvents]);
 
   return (
     <div style={{ padding: '20px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
