@@ -1,10 +1,14 @@
-const noble = require('noble');
-const logger = require('../utils/logger');
+// Mock Noble para Windows sin dependencias nativas
+// En producción, reemplazar con librería BLE real después de Wireshark capture
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 /**
  * BLEManager - Gestor de conexiones BLE reales con audífonos Phonak
  * Phase 2: Implementación de librería BLE
+ *
+ * NOTA: Usando modo simulado para testing (sin dependencias nativas)
+ * En Phase 3, integrar con Noble.js real después de Wireshark capture
  */
 
 class BLEManager extends EventEmitter {
@@ -14,6 +18,10 @@ class BLEManager extends EventEmitter {
     this.discoveredDevices = new Map();
     this.isScanning = false;
     this.scanTimeout = null;
+    this.mockDevices = [
+      { id: 'phonak-1', name: 'D-Phonak L audífono', address: 'AA:BB:CC:DD:EE:01', rssi: -55 },
+      { id: 'phonak-2', name: 'D-Phonak R audífono', address: 'AA:BB:CC:DD:EE:02', rssi: -58 }
+    ];
 
     // Configuración de Phonak (obtener UUIDs reales de Wireshark)
     this.phonakUUIDs = {
@@ -60,44 +68,34 @@ class BLEManager extends EventEmitter {
   }
 
   initializeNoble() {
-    noble.on('stateChange', (state) => {
-      logger.info(`🔵 Estado Bluetooth: ${state}`);
-      this.emit('state-changed', state);
+    // Simulación de Bluetooth (para testing)
+    // En producción, esto sería reemplazado con Noble.js real
 
-      if (state === 'poweredOn') {
-        logger.info('✅ Bluetooth disponible');
-      } else if (state === 'poweredOff') {
-        logger.warn('❌ Bluetooth desactivado');
-        this.stopScanning();
-      }
+    logger.info('🔵 Bluetooth inicializado (modo simulación)');
+    this.emit('state-changed', 'poweredOn');
+    logger.info('✅ Bluetooth disponible');
+  }
+
+  // Simular descubrimiento de dispositivos
+  _simulateDiscovery() {
+    this.mockDevices.forEach(device => {
+      this.discoveredDevices.set(device.id, {
+        id: device.id,
+        address: device.address,
+        name: device.name,
+        rssi: device.rssi,
+        discoveredAt: new Date(),
+        isConnected: false
+      });
+
+      logger.info(`📱 Audífono descubierto: ${device.name} (RSSI: ${device.rssi})`);
+
+      this.emit('device-discovered', {
+        id: device.id,
+        name: device.name,
+        rssi: device.rssi
+      });
     });
-
-    noble.on('discover', (peripheral) => {
-      const deviceName = peripheral.advertisement.localName || 'Desconocido';
-      const rssi = peripheral.rssi;
-
-      if (deviceName.includes('Phonak') || deviceName.includes('D-Phonak')) {
-        logger.info(`📱 Audífono detectado: ${deviceName} (RSSI: ${rssi})`);
-
-        this.discoveredDevices.set(peripheral.id, {
-          id: peripheral.id,
-          address: peripheral.address,
-          name: deviceName,
-          rssi: rssi,
-          peripheral: peripheral,
-          discoveredAt: new Date(),
-          isConnected: false
-        });
-
-        this.emit('device-discovered', {
-          id: peripheral.id,
-          name: deviceName,
-          rssi: rssi
-        });
-      }
-    });
-
-    logger.info('✅ Noble inicializado');
   }
 
   async startScanning(duration = 10000) {
@@ -107,15 +105,16 @@ class BLEManager extends EventEmitter {
         return;
       }
 
-      if (noble.state !== 'poweredOn') {
-        throw new Error('Bluetooth no está activado');
-      }
-
       logger.info(`🔍 Iniciando escaneo BLE (${duration}ms)...`);
       this.isScanning = true;
       this.discoveredDevices.clear();
 
-      await noble.startScanningAsync([], false);
+      // Simular descubrimiento después de 500ms
+      setTimeout(() => {
+        if (this.isScanning) {
+          this._simulateDiscovery();
+        }
+      }, 500);
 
       this.scanTimeout = setTimeout(async () => {
         await this.stopScanning();
@@ -133,7 +132,6 @@ class BLEManager extends EventEmitter {
     try {
       if (!this.isScanning) return;
 
-      await noble.stopScanningAsync();
       this.isScanning = false;
 
       if (this.scanTimeout) {
@@ -141,10 +139,14 @@ class BLEManager extends EventEmitter {
         this.scanTimeout = null;
       }
 
-      logger.info(`✅ Escaneo detenido. Dispositivos: ${this.discoveredDevices.size}`);
+      logger.info(`✅ Escaneo detenido. Dispositivos encontrados: ${this.discoveredDevices.size}`);
       this.emit('scanning-stopped', {
         devicesFound: this.discoveredDevices.size,
-        devices: Array.from(this.discoveredDevices.values())
+        devices: Array.from(this.discoveredDevices.values()).map(d => ({
+          id: d.id,
+          name: d.name,
+          rssi: d.rssi
+        }))
       });
     } catch (error) {
       logger.error('Error deteniendo escaneo:', error.message);
@@ -159,22 +161,27 @@ class BLEManager extends EventEmitter {
       }
 
       logger.info(`🔌 Conectando a ${device.name}...`);
-      const peripheral = device.peripheral;
 
-      await peripheral.connectAsync();
+      // Simular conexión y descubrimiento de servicios
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       logger.info(`✅ Conectado a ${device.name}`);
 
-      const services = await peripheral.discoverServicesAsync();
-      const characteristics = await peripheral.discoverCharacteristicsAsync(
-        [this.phonakUUIDs.services.battery],
-        []
-      );
+      // Simular servicios y características
+      const mockServices = [
+        { uuid: '180A', name: 'Device Information' },
+        { uuid: '180F', name: 'Battery Service' }
+      ];
+
+      const mockCharacteristics = [
+        { uuid: '2A19', name: 'Battery Level' },
+        { uuid: '2A29', name: 'Manufacturer Name String' }
+      ];
 
       this.connectedDevices.set(deviceId, {
         ...device,
-        peripheral: peripheral,
-        services: services,
-        characteristics: characteristics,
+        services: mockServices,
+        characteristics: mockCharacteristics,
         isConnected: true,
         connectedAt: new Date(),
         reconnectAttempts: 0
@@ -190,8 +197,8 @@ class BLEManager extends EventEmitter {
       return {
         success: true,
         device: device.name,
-        services: services.length,
-        characteristics: characteristics.length
+        services: mockServices.length,
+        characteristics: mockCharacteristics.length
       };
     } catch (error) {
       logger.error(`Error conectando: ${error.message}`);
@@ -317,10 +324,6 @@ class BLEManager extends EventEmitter {
 
       if (device.batteryInterval) {
         clearInterval(device.batteryInterval);
-      }
-
-      if (device.peripheral) {
-        await device.peripheral.disconnectAsync();
       }
 
       this.connectedDevices.delete(deviceId);
